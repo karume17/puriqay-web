@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ export default function Login() {
       console.log("EL MOTIVO DEL ERROR ES:", error.message); // Esto nos dará la respuesta
       setErrorMsg(error.message); // Esto lo mostrará en tu pantalla
     } else {
-      alert('¡Inicio de sesión exitoso!');
+      navigate('/dashboard');
     }
     
     setLoading(false);
