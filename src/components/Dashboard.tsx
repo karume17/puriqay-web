@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import VolunteerList from './VolunteerList';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function Dashboard() {
             Cerrar Sesión
           </button>
         </div>
-        <p className="text-gray-600">¡Bienvenido! Aquí construiremos las opciones de Voluntarios, Jornadas y QR.</p>
+        <VolunteerList />
       </div>
     </div>
   );
