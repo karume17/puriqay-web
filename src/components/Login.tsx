@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -72,6 +72,9 @@ export default function Login() {
         >
           {loading ? 'Cargando...' : 'Ingresar'}
         </button>
+        <p className="text-center text-sm text-gray-600 mt-4">
+          ¿No tienes una cuenta? <Link to="/register" className="text-blue-600 hover:underline font-medium">Regístrate aquí</Link>
+        </p>
       </form>
     </div>
   );

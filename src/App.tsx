@@ -1,18 +1,20 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import Register from './components/Register';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta principal: El Login */}
+        {/* Rutas Públicas */}
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         
-        {/* Ruta interna: El Dashboard */}
+        {/* Ruta Interna */}
         <Route path="/dashboard" element={<Dashboard />} />
         
-        {/* Si alguien escribe una ruta que no existe, lo regresamos al login */}
+        {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
