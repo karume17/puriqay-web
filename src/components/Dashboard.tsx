@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import VolunteerList from './VolunteerList';
 import QRCode from 'react-qr-code'; // Nuestra nueva herramienta
+import Projects from './Projects';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -68,8 +69,13 @@ export default function Dashboard() {
             VISTA SOLO PARA ADMIN Y COORDINADORES 
             ========================================= */}
         {(role === 'ADMIN' || role === 'COORDINADOR') && (
-          <div>
-            <p className="text-gray-600 mb-6">Hola equipo interno. Aquí pueden gestionar los datos.</p>
+          <div className="space-y-8">
+            <p className="text-gray-600">Hola equipo interno. Aquí pueden gestionar los datos.</p>
+            
+            {/* Nuestro nuevo módulo de Proyectos */}
+            <Projects />
+
+            {/* La lista de Voluntarios que ya teníamos */}
             <VolunteerList />
           </div>
         )}
