@@ -8,20 +8,20 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página recargue al dar enter
+    e.preventDefault();
     setLoading(true);
     setErrorMsg('');
 
-    // Intentamos iniciar sesión con Supabase
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      setErrorMsg('Correo o contraseña incorrectos.');
+      console.log("EL MOTIVO DEL ERROR ES:", error.message); // Esto nos dará la respuesta
+      setErrorMsg(error.message); // Esto lo mostrará en tu pantalla
     } else {
-      alert('¡Inicio de sesión exitoso!'); // Temporalmente mostraremos un aviso
+      alert('¡Inicio de sesión exitoso!');
     }
     
     setLoading(false);
