@@ -5,11 +5,11 @@ import VolunteerList from './VolunteerList';
 import Locations from './Locations';
 import QRCode from 'react-qr-code';
 import Jornadas from './Jornadas';
-import AttendanceScanner from './AttendanceScanner'; // Importamos el escáner
+import AttendanceScanner from './AttendanceScanner';
 import AttendanceReport from './AttendanceReport';
 import AvailableJornadas from './AvailableJornadas';
 import MarketingBoard from './MarketingBoard';
-// Agregamos el ícono de Camera
+// Agregamos los íconos de lucide-react para el menú lateral
 import { Users, QrCode, LogOut, ChevronLeft, Menu, Calendar, MapPin, Camera, ClipboardList, Megaphone } from 'lucide-react';
 
 export default function Dashboard() {
