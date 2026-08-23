@@ -2,10 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import VolunteerList from './VolunteerList';
-import Projects from './Projects';
+import Locations from './Locations';
 import QRCode from 'react-qr-code';
-// Importamos los íconos
-import { Users, Briefcase, QrCode, LogOut, ChevronLeft, Menu, Calendar } from 'lucide-react';
+import Jornadas from './Jornadas';
+import AttendanceScanner from './AttendanceScanner'; // Importamos el escáner
+import AttendanceReport from './AttendanceReport';
+import AvailableJornadas from './AvailableJornadas';
+import MarketingBoard from './MarketingBoard';
+// Agregamos el ícono de Camera
+import { Users, QrCode, LogOut, ChevronLeft, Menu, Calendar, MapPin, Camera, ClipboardList, Megaphone } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -42,11 +47,12 @@ export default function Dashboard() {
     if (data) {
       setRole(data.role);
       setQrToken(data.qr_token);
+      
       // Dependiendo del rol, lo mandamos a una pestaña por defecto
       if (data.role === 'VOLUNTARIO') {
-        setActiveTab('qr');
+        setActiveTab('available_jornadas'); // <-- CAMBIO AQUÍ
       } else {
-        setActiveTab('projects');
+        setActiveTab('locations');
       }
     }
     setLoading(false);
@@ -103,10 +109,19 @@ export default function Dashboard() {
           {/* Si es del equipo interno, ve estas opciones */}
           {(role === 'ADMIN' || role === 'COORDINADOR') && (
             <>
-              <SidebarItem id="projects" label="Proyectos" icon={Briefcase} />
+              <SidebarItem id="locations" label="Lugares" icon={MapPin} />
               <SidebarItem id="volunteers" label="Voluntarios" icon={Users} />
-              {/* <SidebarItem id="jornadas" label="Jornadas" icon={Calendar} /> (Lo activaremos pronto) */}
+              <SidebarItem id="jornadas" label="Jornadas" icon={Calendar} />
+              <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={Calendar} />
+              <SidebarItem id="marketing" label="Área de Marketing" icon={Megaphone} />
+              <SidebarItem id="scanner" label="Escanear Asistencia" icon={Camera} />
+              <SidebarItem id="reports" label="Reporte de Asistencia" icon={ClipboardList} />
             </>
+          )}
+
+          {/* Menú para Voluntarios Externos */}
+          {role === 'VOLUNTARIO' && (
+            <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={Calendar} />
           )}
 
           {/* El código QR lo ven todos */}
@@ -131,11 +146,17 @@ export default function Dashboard() {
           ========================================== */}
       <div className="flex-1 overflow-y-auto p-8">
         
-        {/* Renderizado Dinámico: Dependiendo del botón, mostramos una pantalla u otra */}
-        {activeTab === 'projects' && (
+        {activeTab === 'locations' && (
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Gestión de Proyectos</h1>
-            <Projects />
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Directorio de Lugares Aliados</h1>
+            <Locations />
+          </div>
+        )}
+
+        {activeTab === 'jornadas' && (
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Gestión de Jornadas</h1>
+            <Jornadas />
           </div>
         )}
 
@@ -143,6 +164,35 @@ export default function Dashboard() {
           <div className="max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">Base de Datos de Voluntarios</h1>
             <VolunteerList />
+          </div>
+        )}
+
+        {/* ¡Aquí renderizamos el módulo del Escáner! */}
+        {activeTab === 'scanner' && (
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Escáner Operativo</h1>
+            <AttendanceScanner />
+          </div>
+        )}
+
+        {activeTab === 'reports' && (
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Panel de Supervisión</h1>
+            <AttendanceReport />
+          </div>
+        )}
+
+        {activeTab === 'available_jornadas' && (
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Voluntariados Disponibles</h1>
+            <AvailableJornadas />
+          </div>
+        )}
+
+        {activeTab === 'marketing' && (
+          <div className="max-w-6xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Gestión de Contenidos</h1>
+            <MarketingBoard />
           </div>
         )}
 
