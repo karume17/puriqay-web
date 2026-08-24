@@ -8,7 +8,7 @@ import Jornadas from './Jornadas';
 import AttendanceScanner from './AttendanceScanner';
 import AvailableJornadas from './AvailableJornadas';
 import MarketingBoard from './MarketingBoard';
-import { Users, QrCode, LogOut, ChevronLeft, Menu, Calendar, MapPin, Camera, Megaphone } from 'lucide-react';
+import { Users, QrCode, LogOut, ChevronLeft, Menu, CalendarDays, CalendarCheck, MapPin, Camera, ClipboardList, Megaphone } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -115,21 +115,21 @@ export default function Dashboard() {
           
           {/* MÓDULOS DE GESTIÓN (EXCLUSIVOS POR ÁREA) */}
           {(isSuperAdmin || isProyectos) && <SidebarItem id="locations" label="Lugares" icon={MapPin} />}
-          {(isSuperAdmin || isProyectos) && <SidebarItem id="jornadas" label="Jornadas" icon={Calendar} />}
+          {(isSuperAdmin || isProyectos) && <SidebarItem id="jornadas" label="Jornadas" icon={CalendarDays} />}
           {(isSuperAdmin || isRRHH) && <SidebarItem id="volunteers" label="Voluntarios" icon={Users} />}
           {(isSuperAdmin || isMarketing) && <SidebarItem id="marketing" label="Área de Marketing" icon={Megaphone} />}
 
           {/* MÓDULOS ESTÁNDAR (TODOS LOS INTERNOS) */}
           {isInternal && (
             <>
-              <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={Calendar} />
+              <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={CalendarCheck} />
               <SidebarItem id="scanner" label="Control de Asistencia" icon={Camera} />
             </>
           )}
 
           {/* MÓDULOS VOLUNTARIOS EXTERNOS */}
           {isVoluntario && (
-            <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={Calendar} />
+            <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={CalendarCheck} />
           )}
 
           {/* CÓDIGO QR (TODOS) */}
