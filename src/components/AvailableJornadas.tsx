@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { Search, ChevronDown, ChevronUp, AlertCircle, MapPin, Calendar, Clock } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AvailableJornadas() {
   const [jornadas, setJornadas] = useState<any[]>([]);
@@ -91,7 +92,7 @@ export default function AvailableJornadas() {
     }
 
     if (error) {
-      alert('Error al guardar la respuesta: ' + error.message);
+      toast.error('Error al guardar la respuesta: ' + error.message);
     } else {
       setShowModal(false);
       setJustificationText('');

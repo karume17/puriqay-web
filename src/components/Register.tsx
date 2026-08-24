@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -31,12 +32,12 @@ export default function Register() {
           setLocationText('✅ Ubicación guardada');
         },
         () => {
-          alert('Error al obtener ubicación. Asegúrate de darle permisos a tu navegador.');
+          toast.error('Error al obtener ubicación. Asegúrate de darle permisos a tu navegador.');
           setLocationText('📍 Obtener mi ubicación actual');
         }
       );
     } else {
-      alert('Tu navegador no soporta geolocalización.');
+      toast.error('Tu navegador no soporta geolocalización.');
     }
   };
 
@@ -81,7 +82,7 @@ export default function Register() {
       if (profileError) {
         setErrorMsg('Usuario creado, pero hubo un error al guardar los datos personales.');
       } else {
-        alert('¡Registro exitoso! Bienvenido a Puriqay.');
+        toast.success('¡Registro exitoso! Bienvenido a Puriqay.');
         navigate('/dashboard'); 
       }
     }

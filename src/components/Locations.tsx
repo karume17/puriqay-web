@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { MapPin, Phone, User, Map, Info, Activity } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 type Location = {
   id: string;
@@ -61,9 +62,9 @@ export default function Locations() {
     const { error } = await supabase.from('locations').insert([formData]);
 
     if (error) {
-      alert('Error al registrar el lugar: ' + error.message);
+      toast.error('Error al registrar el lugar: ' + error.message);
     } else {
-      alert('¡Lugar registrado con éxito!');
+      toast.success('¡Lugar registrado con éxito!');
       setFormData({
         name: '', action_line: 'Animalista', manager_name: '', contact_phone: '', 
         address: '', district: '', maps_link: '', meeting_point: '', special_instructions: '', status: 'ACTIVO'

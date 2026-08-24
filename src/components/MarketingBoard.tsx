@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { AlertCircle, Clock, CheckCircle, ExternalLink, Send, Edit3, CheckCircle2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function MarketingBoard() {
   const [tasks, setTasks] = useState<any[]>([]);
