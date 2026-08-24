@@ -13,7 +13,7 @@ import { Users, QrCode, LogOut, ChevronLeft, Menu, CalendarDays, CalendarCheck, 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [role, setRole] = useState<string | null>(null);
-  const [area, setArea] = useState<string | null>(null); // NUEVO: Guardamos el área
+  const [area, setArea] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -21,6 +21,10 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('');
 
   useEffect(() => {
+    // Si la pantalla es de celular al cargar, escondemos el menú por defecto
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
     checkUserRole();
   }, []);
 
@@ -32,7 +36,6 @@ export default function Dashboard() {
       return;
     }
 
-    // NUEVO: Traemos también el área desde la base de datos
     const { data, error } = await supabase
       .from('profiles')
       .select('role, qr_token, area')
@@ -47,8 +50,6 @@ export default function Dashboard() {
       setRole(data.role);
       setArea(data.area);
       setQrToken(data.qr_token);
-      
-      // CAMBIO: Todos inician en jornadas disponibles para evitar pantallas en blanco por falta de permisos
       setActiveTab('available_jornadas'); 
     }
     setLoading(false);
@@ -63,7 +64,11 @@ export default function Dashboard() {
     const isActive = activeTab === id;
     return (
       <button
-        onClick={() => setActiveTab(id)}
+        onClick={() => {
+          setActiveTab(id);
+          // Si estamos en celular, cerramos el menú automáticamente al elegir una opción
+          if (window.innerWidth < 768) setIsSidebarOpen(false);
+        }}
         className={`w-full flex items-center p-3 mb-2 rounded-xl transition-all duration-200 font-medium ${
           isActive 
             ? 'bg-pq-teal text-white shadow-md shadow-pq-teal/30' 
@@ -79,23 +84,30 @@ export default function Dashboard() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-500 font-medium">Cargando Puriqay...</div>;
 
-  // ==========================================
-  // MATRIZ DE PERMISOS (RBAC)
-  // ==========================================
   const isSuperAdmin = (area === 'Gerencia General' || area === 'Tecnologías de la Información') && role === 'ADMIN';
   const isProyectos = area === 'Gestión de Proyectos Sociales' && role === 'ADMIN';
   const isRRHH = area === 'Gestión Humana' && role === 'ADMIN';
-  const isMarketing = area === 'Comunicación y Difusión'; // Admins y Coordinadores
+  const isMarketing = area === 'Comunicación y Difusión'; 
   const isInternal = role === 'ADMIN' || role === 'COORDINADOR';
   const isVoluntario = role === 'VOLUNTARIO';
 
   return (
-    <div className="flex h-screen bg-pq-cream overflow-hidden">
+    <div className="flex h-screen bg-pq-cream overflow-hidden relative">
       
+      {/* FONDO OSCURO PARA CELULARES (Aparece cuando el menú está abierto) */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-pq-ink/20 backdrop-blur-sm z-40 md:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* BARRA LATERAL (SIDEBAR) */}
-      <div className={`bg-white border-r border-pq-cream-dark transition-all duration-300 flex flex-col shadow-lg z-20 ${isSidebarOpen ? 'w-68' : 'w-20'}`}>
+      <div className={`fixed md:relative z-50 h-full bg-white border-r border-pq-cream-dark transition-all duration-300 flex flex-col shadow-2xl md:shadow-none ${
+        isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-20'
+      }`}>
         
-        <div className="h-20 flex items-center justify-between px-5 border-b border-pq-cream-dark">
+        <div className="h-20 flex items-center justify-between px-5 border-b border-pq-cream-dark shrink-0">
           {isSidebarOpen && (
             <div className="flex flex-col">
               <h1 className="font-black text-2xl text-pq-teal-deep tracking-tight flex items-center gap-1">
@@ -107,13 +119,12 @@ export default function Dashboard() {
           )}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-            className="p-2 rounded-xl hover:bg-pq-cream text-pq-teal-deep transition-colors ml-auto"
+            className="p-2 rounded-xl hover:bg-pq-cream text-pq-teal-deep transition-colors ml-auto md:block"
           >
             {isSidebarOpen ? <ChevronLeft size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Indicador de Perfil */}
         {isSidebarOpen && (
           <div className="px-5 pt-5 pb-3">
             <div className="bg-pq-cream rounded-xl p-3 border border-pq-cream-dark/50">
@@ -124,15 +135,11 @@ export default function Dashboard() {
         )}
 
         <nav className="flex-1 px-4 py-2 overflow-y-auto">
-          {/* ... (Aquí dejas todos tus SidebarItems intactos) ... */}
-          
-          {/* MÓDULOS DE GESTIÓN (EXCLUSIVOS POR ÁREA) */}
           {(isSuperAdmin || isProyectos) && <SidebarItem id="locations" label="Lugares" icon={MapPin} />}
           {(isSuperAdmin || isProyectos) && <SidebarItem id="jornadas" label="Jornadas" icon={CalendarDays} />}
           {(isSuperAdmin || isRRHH) && <SidebarItem id="volunteers" label="Voluntarios" icon={Users} />}
           {(isSuperAdmin || isMarketing) && <SidebarItem id="marketing" label="Área de Marketing" icon={Megaphone} />}
 
-          {/* MÓDULOS ESTÁNDAR (TODOS LOS INTERNOS) */}
           {isInternal && (
             <>
               <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={CalendarCheck} />
@@ -140,18 +147,14 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* MÓDULOS VOLUNTARIOS EXTERNOS */}
           {isVoluntario && (
             <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={CalendarCheck} />
           )}
 
-          {/* CÓDIGO QR (TODOS) */}
           <SidebarItem id="qr" label="Mi Código QR" icon={QrCode} />
-          
         </nav>
 
-        {/* Pie del Menú (Cerrar Sesión) */}
-        <div className="p-4 border-t border-pq-cream-dark">
+        <div className="p-4 border-t border-pq-cream-dark shrink-0">
           <button 
             onClick={handleLogout} 
             className="w-full flex items-center p-3 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium"
@@ -164,89 +167,85 @@ export default function Dashboard() {
       </div>
 
       {/* CONTENIDO PRINCIPAL */}
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden w-full">
         
-        {activeTab === 'locations' && (
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Directorio de Lugares Aliados</h1>
-            <Locations />
-          </div>
-        )}
+        {/* BARRA SUPERIOR (SOLO VISIBLE EN CELULARES) */}
+        <div className="md:hidden flex items-center justify-between bg-white px-5 py-4 border-b border-pq-cream-dark shrink-0 shadow-sm z-10">
+          <h1 className="font-black text-2xl text-pq-teal-deep tracking-tight flex items-center gap-1">
+            Puriqay <span className="w-2 h-2 rounded-full bg-pq-marku"></span>
+          </h1>
+          <button 
+            onClick={() => setIsSidebarOpen(true)} 
+            className="p-2 rounded-xl bg-pq-cream text-pq-teal-deep hover:bg-pq-cream-dark transition-colors"
+          >
+            <Menu size={24} />
+          </button>
+        </div>
 
-        {activeTab === 'jornadas' && (
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Gestión de Jornadas</h1>
-            <Jornadas />
-          </div>
-        )}
-
-        {activeTab === 'volunteers' && (
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Base de Datos de Voluntarios</h1>
-            <VolunteerList />
-          </div>
-        )}
-
-        {activeTab === 'scanner' && (
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Escáner Operativo</h1>
-            <AttendanceScanner />
-          </div>
-        )}
-
-        {activeTab === 'available_jornadas' && (
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Voluntariados Disponibles</h1>
-            <AvailableJornadas />
-          </div>
-        )}
-
-        {activeTab === 'marketing' && (
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              Gestión de Contenidos
-            </h1>
-            <MarketingBoard />
-          </div>
-        )}
-
-        {activeTab === 'qr' && (
-          <div className="max-w-sm mx-auto bg-white p-8 rounded-[2.5rem] shadow-xl border-2 border-pq-cream-dark text-center mt-10 relative overflow-hidden">
-            {/* Detalle superior (estilo gafete/fotocheck) */}
-            <div className="absolute top-0 left-0 w-full h-4 bg-pq-teal"></div>
-            
-            <h2 className="text-3xl font-black text-pq-teal-deep mt-4 flex items-center justify-center gap-2">
-              Credencial <span className="w-2.5 h-2.5 rounded-full bg-pq-marku"></span>
-            </h2>
-            <p className="text-pq-ink/60 font-medium text-sm mt-3 mb-8">
-              Muestra este código al equipo de Puriqay al llegar a tus actividades.
-            </p>
-            
-            {/* Contenedor del QR */}
-            <div className="bg-white p-4 rounded-3xl border-4 border-pq-cream-dark shadow-inner inline-block relative group transition-transform hover:scale-105">
-              {qrToken ? (
-                <QRCode 
-                  value={qrToken} 
-                  size={200} 
-                  level="H" 
-                  fgColor="#21514d" /* Tu color pq-teal-deep (#21514d) */
-                  bgColor="#ffffff"
-                />
-              ) : (
-                <div className="w-[200px] h-[200px] flex items-center justify-center bg-pq-cream/50 rounded-2xl">
-                  <p className="text-pq-teal-dark font-bold animate-pulse">Generando...</p>
-                </div>
-              )}
+        {/* ÁREA DE SCROLL DE LOS MÓDULOS */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          
+          {activeTab === 'locations' && (
+            <div className="max-w-6xl mx-auto">
+              <Locations />
             </div>
-            
-            {/* Caja del Token */}
-            <div className="mt-8 bg-pq-cream/30 py-3 px-4 rounded-xl border border-pq-cream-dark">
-              <p className="text-[10px] font-black text-pq-teal-dark uppercase tracking-widest mb-1">Token Seguro</p>
-              <p className="text-xs text-pq-ink/50 font-mono truncate">{qrToken}</p>
-            </div>
-          </div>
-        )}
+          )}
 
+          {activeTab === 'jornadas' && (
+            <div className="max-w-6xl mx-auto">
+              <Jornadas />
+            </div>
+          )}
+
+          {activeTab === 'volunteers' && (
+            <div className="max-w-6xl mx-auto">
+              <VolunteerList />
+            </div>
+          )}
+
+          {activeTab === 'scanner' && (
+            <div className="max-w-6xl mx-auto">
+              <AttendanceScanner />
+            </div>
+          )}
+
+          {activeTab === 'available_jornadas' && (
+            <div className="max-w-6xl mx-auto">
+              <AvailableJornadas />
+            </div>
+          )}
+
+          {activeTab === 'marketing' && (
+            <div className="max-w-6xl mx-auto">
+              <MarketingBoard />
+            </div>
+          )}
+
+          {activeTab === 'qr' && (
+            <div className="max-w-sm mx-auto bg-white p-8 rounded-[2.5rem] shadow-xl border-2 border-pq-cream-dark text-center mt-4 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-4 bg-pq-teal"></div>
+              <h2 className="text-3xl font-black text-pq-teal-deep mt-4 flex items-center justify-center gap-2">
+                Credencial <span className="w-2.5 h-2.5 rounded-full bg-pq-marku"></span>
+              </h2>
+              <p className="text-pq-ink/60 font-medium text-sm mt-3 mb-8">
+                Muestra este código al equipo de Puriqay al llegar a tus actividades.
+              </p>
+              <div className="bg-white p-4 rounded-3xl border-4 border-pq-cream-dark shadow-inner inline-block relative group transition-transform hover:scale-105">
+                {qrToken ? (
+                  <QRCode value={qrToken} size={200} level="H" fgColor="#21514d" bgColor="#ffffff"/>
+                ) : (
+                  <div className="w-[200px] h-[200px] flex items-center justify-center bg-pq-cream/50 rounded-2xl">
+                    <p className="text-pq-teal-dark font-bold animate-pulse">Generando...</p>
+                  </div>
+                )}
+              </div>
+              <div className="mt-8 bg-pq-cream/30 py-3 px-4 rounded-xl border border-pq-cream-dark">
+                <p className="text-[10px] font-black text-pq-teal-dark uppercase tracking-widest mb-1">Token Seguro</p>
+                <p className="text-xs text-pq-ink/50 font-mono truncate">{qrToken}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
