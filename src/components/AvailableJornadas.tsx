@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { Search, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, AlertCircle, MapPin, Calendar, Clock } from 'lucide-react';
 
 export default function AvailableJornadas() {
   const [jornadas, setJornadas] = useState<any[]>([]);
@@ -134,51 +134,51 @@ export default function AvailableJornadas() {
     }, {});
   }, [jornadas, searchQuery]);
 
-  if (loading) return <p className="text-gray-500 font-medium">Cargando jornadas disponibles...</p>;
+  if (loading) return <div className="flex justify-center p-10"><p className="text-pq-teal-dark font-medium animate-pulse">Cargando jornadas disponibles...</p></div>;
 
   return (
     <div className="space-y-6 relative">
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-pq-cream-dark shadow-sm">
         
         <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
+          <h2 className="text-2xl font-black text-pq-teal-deep mb-2 flex items-center gap-2">
             {userRole === 'VOLUNTARIO' ? "Próximas Jornadas" : "Confirmación de Asistencia"}
+            <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-pq-ink/70 mb-6 font-medium">
             {userRole === 'VOLUNTARIO' 
               ? "Explora las actividades y anótate para participar." 
               : "Como equipo interno, es tu deber confirmar o justificar tu asistencia a cada jornada."}
           </p>
           
           <div className="relative">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+            <Search className="absolute left-4 top-3.5 text-pq-teal-dark/50" size={20} />
             <input 
               type="text" 
               placeholder="Buscar por nombre de jornada..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+              className="w-full pl-12 pr-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:bg-white focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none transition-all text-pq-ink placeholder-pq-ink/40 font-medium"
             />
           </div>
         </div>
 
         {Object.keys(groupedJornadas).length === 0 ? (
-          <div className="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-gray-500">No se encontraron jornadas futuras.</p>
+          <div className="text-center p-10 bg-pq-cream/50 rounded-2xl border-2 border-dashed border-pq-cream-dark">
+            <p className="text-pq-teal-dark font-medium">No se encontraron jornadas futuras.</p>
           </div>
         ) : (
           <div className="space-y-8">
             
             {Object.keys(groupedJornadas).sort().reverse().map(year => (
               <div key={year}>
-                <h3 className="text-2xl font-black text-gray-800 border-b-2 border-gray-800 pb-2 mb-4">{year}</h3>
+                <h3 className="text-3xl font-black text-pq-teal-deep border-b-4 border-pq-teal-dark/20 pb-2 mb-6 inline-block pr-8">{year}</h3>
                 
                 {Object.keys(groupedJornadas[year]).map(month => {
                   const groupKey = `${year}-${month}`;
                   const isGroupExpanded = expandedGroups.includes(groupKey);
                   const jornadasDelMes = groupedJornadas[year][month];
 
-                  // MAGIA DEL SEMÁFORO: Calculamos si falta responder al menos 1 en este mes
                   const hayPendientes = jornadasDelMes.some((jor: any) => {
                     const miEstado = inscripciones[jor.id] ? inscripciones[jor.id].status : null;
                     return userRole !== 'VOLUNTARIO' && !miEstado;
@@ -189,30 +189,31 @@ export default function AvailableJornadas() {
                       
                       <button 
                         onClick={() => toggleGroup(groupKey)}
-                        className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors ${
-                          isGroupExpanded ? 'bg-gray-100 text-gray-800' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-200 border-2 ${
+                          isGroupExpanded 
+                            ? 'bg-pq-teal text-white border-pq-teal shadow-md shadow-pq-teal/20' 
+                            : 'bg-pq-cream/50 text-pq-teal-deep border-pq-cream-dark hover:bg-pq-cream hover:border-pq-teal/30'
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <h4 className="text-md font-bold uppercase tracking-wider">{month}</h4>
-                          {/* INDICADOR VISUAL PARA INTERNOS */}
+                          <h4 className="text-lg font-black uppercase tracking-wider">{month}</h4>
                           {userRole !== 'VOLUNTARIO' && (
                             hayPendientes ? (
-                              <span className="flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full border border-yellow-200">
+                              <span className="flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full border border-yellow-200 shadow-sm">
                                 <AlertCircle size={14} /> Pendientes
                               </span>
                             ) : (
-                              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">
+                              <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                                 ✅ Completo
                               </span>
                             )
                           )}
                         </div>
-                        {isGroupExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        {isGroupExpanded ? <ChevronUp size={22} /> : <ChevronDown size={22} />}
                       </button>
                       
                       {isGroupExpanded && (
-                        <div className="space-y-3 mt-3 ml-2 md:ml-4 border-l-2 border-gray-100 pl-4">
+                        <div className="space-y-4 mt-4 ml-2 md:ml-6 border-l-4 border-pq-cream-dark pl-4 md:pl-6">
                           {jornadasDelMes.map((jor: any) => {
                             const miInscripcion = inscripciones[jor.id];
                             const miEstado = miInscripcion ? miInscripcion.status : null;
@@ -220,96 +221,101 @@ export default function AvailableJornadas() {
                             const isPending = userRole !== 'VOLUNTARIO' && !miEstado;
 
                             return (
-                              <div key={jor.id} className={`border rounded-xl transition-all duration-200 overflow-hidden ${isExpanded ? 'shadow-md border-blue-200' : 'hover:shadow hover:border-gray-300 bg-white'}`}>
+                              <div key={jor.id} className={`border-2 rounded-2xl transition-all duration-300 overflow-hidden ${
+                                isExpanded ? 'shadow-lg border-pq-teal bg-white scale-[1.01]' : 'shadow-sm border-pq-cream-dark hover:border-pq-teal/50 bg-white hover:shadow-md'
+                              }`}>
                                 
                                 <button 
                                   onClick={() => toggleExpandJornada(jor.id)}
-                                  className={`w-full text-left p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 ${isExpanded ? 'bg-blue-50' : 'bg-white'}`}
+                                  className={`w-full text-left p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
+                                    isExpanded ? 'bg-pq-teal/5' : 'bg-white'
+                                  }`}
                                 >
                                   <div className="flex-1">
-                                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                                      <h5 className="font-bold text-gray-800 text-lg">{jor.name}</h5>
+                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                      <h5 className="font-black text-pq-teal-deep text-xl">{jor.name}</h5>
                                       
                                       {isPending && (
-                                        <span className="flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full border border-yellow-200">
+                                        <span className="flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-1 rounded-full border border-yellow-200">
                                           <AlertCircle size={14} /> Pendiente
                                         </span>
                                       )}
                                       {miInscripcion?.has_changed && (
-                                        <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded-full">
-                                          ⚠️ (C) Cambió
+                                        <span className="bg-orange-100 text-orange-800 text-xs font-bold px-2.5 py-1 rounded-full">
+                                          ⚠️ Cambió
                                         </span>
                                       )}
                                       {miEstado === 'ASISTIRÁ' && !miInscripcion?.has_changed && (
-                                        <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">Confirmado</span>
+                                        <span className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Confirmado</span>
                                       )}
                                       {miEstado === 'NO ASISTIRÁ' && !miInscripcion?.has_changed && (
-                                        <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">No asistirá</span>
+                                        <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">No asistirá</span>
                                       )}
                                     </div>
-                                    <p className="text-sm text-gray-500 font-medium">
-                                      {/* PARCHE DE ZONA HORARIA APLICADO AQUÍ */}
-                                      📅 {new Date(jor.date + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric' })} • ⏰ {jor.start_time.slice(0,5)}
-                                    </p>
+                                    <div className="flex flex-wrap gap-4 text-sm text-pq-teal-dark font-medium">
+                                      <span className="flex items-center gap-1 bg-pq-cream px-3 py-1 rounded-lg"><Calendar size={14} /> {new Date(jor.date + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric' })}</span>
+                                      <span className="flex items-center gap-1 bg-pq-cream px-3 py-1 rounded-lg"><Clock size={14} /> {jor.start_time.slice(0,5)}</span>
+                                    </div>
                                   </div>
-                                  <div className="text-gray-400">
-                                    {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                  <div className={`p-2 rounded-full ${isExpanded ? 'bg-pq-teal text-white' : 'bg-pq-cream text-pq-teal-dark'}`}>
+                                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                   </div>
                                 </button>
 
                                 {isExpanded && (
-                                  <div className="p-5 border-t border-gray-100 bg-gray-50/50">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                      <div>
-                                        <p className="text-sm text-gray-500 mb-1">Ubicación</p>
-                                        <p className="font-medium text-gray-800">📍 {jor.locations?.name} ({jor.locations?.district})</p>
+                                  <div className="p-6 border-t-2 border-pq-cream-dark bg-white">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                      <div className="bg-pq-cream/30 p-4 rounded-xl border border-pq-cream-dark">
+                                        <p className="text-xs font-bold text-pq-teal-dark uppercase tracking-wider mb-1 flex items-center gap-1"><MapPin size={14}/> Ubicación</p>
+                                        <p className="font-bold text-pq-teal-deep text-lg">{jor.locations?.name}</p>
+                                        <p className="text-sm text-pq-ink/70">{jor.locations?.district}</p>
                                       </div>
-                                      <div>
-                                        <p className="text-sm text-gray-500 mb-1">Punto de Encuentro</p>
-                                        <p className="font-medium text-gray-800">📌 {jor.locations?.meeting_point || 'Por definir'}</p>
+                                      <div className="bg-pq-cream/30 p-4 rounded-xl border border-pq-cream-dark">
+                                        <p className="text-xs font-bold text-pq-teal-dark uppercase tracking-wider mb-1">📌 Punto de Encuentro</p>
+                                        <p className="font-bold text-pq-teal-deep">{jor.locations?.meeting_point || 'Por definir'}</p>
                                       </div>
                                     </div>
                                     
-                                    <div className="pt-4 border-t border-gray-200">
+                                    <div className="pt-4 border-t-2 border-dashed border-pq-cream-dark">
                                       {userRole === 'VOLUNTARIO' ? (
                                         <button 
                                           onClick={() => handleCommitment(jor.id, 'ASISTIRÁ')}
                                           disabled={miEstado === 'ASISTIRÁ'}
-                                          className={`w-full md:w-auto py-2.5 px-6 rounded-lg font-bold transition ${
+                                          className={`w-full md:w-auto py-3 px-8 rounded-xl font-bold transition-all duration-200 text-lg ${
                                             miEstado === 'ASISTIRÁ'
-                                              ? 'bg-green-100 text-green-700 cursor-not-allowed' 
-                                              : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
+                                              ? 'bg-green-100 text-green-700 cursor-not-allowed opacity-80' 
+                                              : 'bg-pq-teal hover:bg-pq-teal-dark text-white shadow-lg shadow-pq-teal/30 hover:shadow-pq-teal/50 transform hover:-translate-y-0.5'
                                           }`}
                                         >
                                           {miEstado === 'ASISTIRÁ' ? '✅ Ya estás inscrito' : '✋ Inscribirme a esta jornada'}
                                         </button>
                                       ) : (
                                         <div>
-                                          <p className="text-sm font-medium text-gray-700 mb-3">Tu respuesta es obligatoria:</p>
-                                          <div className="flex flex-col sm:flex-row gap-3">
+                                          <p className="text-sm font-black text-pq-teal-deep mb-3 uppercase tracking-wider">Tu respuesta es obligatoria:</p>
+                                          <div className="flex flex-col sm:flex-row gap-4">
                                             <button 
                                               onClick={() => handleCommitment(jor.id, 'ASISTIRÁ')}
-                                              className={`flex-1 py-2.5 rounded-lg font-bold transition border ${
+                                              className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 border-2 ${
                                                 miEstado === 'ASISTIRÁ' 
-                                                  ? 'bg-green-600 text-white border-green-600 shadow-md ring-2 ring-green-200 ring-offset-1' 
-                                                  : 'bg-white text-green-600 border-green-600 hover:bg-green-50'
+                                                  ? 'bg-pq-teal text-white border-pq-teal shadow-lg shadow-pq-teal/30 ring-4 ring-pq-teal/20' 
+                                                  : 'bg-white text-pq-teal border-pq-teal hover:bg-pq-teal hover:text-white'
                                               }`}
                                             >
                                               Sí, asistiré
                                             </button>
                                             <button 
                                               onClick={() => openJustificationModal(jor.id)}
-                                              className={`flex-1 py-2.5 rounded-lg font-bold transition border ${
+                                              className={`flex-1 py-3 rounded-xl font-bold transition-all duration-200 border-2 ${
                                                 miEstado === 'NO ASISTIRÁ' 
-                                                  ? 'bg-red-600 text-white border-red-600 shadow-md ring-2 ring-red-200 ring-offset-1' 
-                                                  : 'bg-white text-red-600 border-red-600 hover:bg-red-50'
+                                                  ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/30 ring-4 ring-red-500/20' 
+                                                  : 'bg-white text-red-500 border-red-500 hover:bg-red-500 hover:text-white'
                                               }`}
                                             >
                                               No asistiré
                                             </button>
                                           </div>
                                           {miEstado === 'NO ASISTIRÁ' && (
-                                            <div className="mt-3 bg-red-50 p-3 rounded-lg border border-red-100">
+                                            <div className="mt-4 bg-red-50 p-4 rounded-xl border border-red-100">
                                               <p className="text-sm text-red-800">
                                                 <strong>Motivo de inasistencia:</strong> {miInscripcion.justification_type}
                                               </p>
@@ -337,15 +343,18 @@ export default function AvailableJornadas() {
         )}
       </div>
 
+      {/* MODAL DE JUSTIFICACIÓN */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Justificar Inasistencia</h3>
-            <p className="text-sm text-gray-600 mb-4">Como miembro del equipo interno, es obligatorio registrar el motivo de tu inasistencia.</p>
-            <div className="space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-pq-ink/60 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-pq-cream-dark">
+            <h3 className="text-2xl font-black text-pq-teal-deep mb-2 flex items-center gap-2">
+              Justificar Inasistencia <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
+            </h3>
+            <p className="text-sm text-pq-ink/70 mb-6 font-medium">Como miembro del equipo interno, es obligatorio registrar el motivo de tu inasistencia.</p>
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motivo Principal</label>
-                <select value={justificationType} onChange={(e) => setJustificationType(e.target.value)} className="w-full px-4 py-2 border rounded-lg bg-gray-50 focus:ring-blue-500 outline-none">
+                <label className="block text-sm font-bold text-pq-teal-dark mb-2">Motivo Principal</label>
+                <select value={justificationType} onChange={(e) => setJustificationType(e.target.value)} className="w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none font-medium text-pq-ink transition-all">
                   <option value="Salud">Salud (Enfermedad/Cita médica)</option>
                   <option value="Trabajo/Estudio">Cruce con Trabajo / Estudios</option>
                   <option value="Problema Familiar">Urgencia Familiar</option>
@@ -354,13 +363,13 @@ export default function AvailableJornadas() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Detalle (Opcional)</label>
-                <textarea value={justificationText} onChange={(e) => setJustificationText(e.target.value)} rows={3} placeholder="Explica brevemente..." className="w-full px-4 py-2 border rounded-lg bg-gray-50 focus:ring-blue-500 outline-none"></textarea>
+                <label className="block text-sm font-bold text-pq-teal-dark mb-2">Detalle (Opcional)</label>
+                <textarea value={justificationText} onChange={(e) => setJustificationText(e.target.value)} rows={3} placeholder="Explica brevemente..." className="w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none font-medium text-pq-ink transition-all resize-none"></textarea>
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition">Cancelar</button>
-              <button onClick={() => handleCommitment(selectedJornadaId, 'NO ASISTIRÁ', justificationType, justificationText)} className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Confirmar Inasistencia</button>
+            <div className="flex justify-end gap-3 mt-8">
+              <button onClick={() => setShowModal(false)} className="px-5 py-2.5 text-pq-ink/70 font-bold hover:bg-pq-cream rounded-xl transition-colors">Cancelar</button>
+              <button onClick={() => handleCommitment(selectedJornadaId, 'NO ASISTIRÁ', justificationType, justificationText)} className="px-5 py-2.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/30 transition-all">Confirmar Inasistencia</button>
             </div>
           </div>
         </div>

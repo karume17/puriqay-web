@@ -20,8 +20,8 @@ export default function Login() {
     });
 
     if (error) {
-      console.log("EL MOTIVO DEL ERROR ES:", error.message); // Esto nos dará la respuesta
-      setErrorMsg(error.message); // Esto lo mostrará en tu pantalla
+      console.log("EL MOTIVO DEL ERROR ES:", error.message);
+      setErrorMsg(error.message);
     } else {
       navigate('/dashboard');
     }
@@ -30,52 +30,61 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">Puriqay</h2>
-        <p className="text-gray-500 mt-2">Plataforma de Voluntariado</p>
+    <div className="min-h-screen bg-pq-cream flex justify-center items-center p-4">
+      <div className="w-full max-w-md bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-pq-cream-dark">
+        
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-black text-pq-teal-deep flex items-center justify-center gap-1.5 tracking-tight">
+            Puriqay
+            <span className="w-2.5 h-2.5 rounded-full bg-pq-marku mt-2"></span>
+          </h2>
+          <p className="text-pq-teal-dark/70 font-bold uppercase tracking-widest text-xs mt-2">Plataforma de Voluntariado</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-pq-teal-dark mb-2">Correo Electrónico</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:bg-white focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none transition-all font-medium text-pq-ink"
+              placeholder="tu@correo.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-pq-teal-dark mb-2">Contraseña</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:bg-white focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none transition-all font-medium text-pq-ink"
+              placeholder="••••••••"
+            />
+          </div>
+
+          {errorMsg && (
+            <div className="bg-red-50 text-red-600 text-sm text-center font-bold p-3 rounded-xl border border-red-100">
+              {errorMsg}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-pq-teal hover:bg-pq-teal-dark text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-pq-teal/30 hover:-translate-y-0.5 transition-all duration-200 mt-2"
+          >
+            {loading ? 'Cargando...' : 'Ingresar al sistema'}
+          </button>
+          
+          <p className="text-center text-sm text-pq-ink/70 mt-6 font-medium">
+            ¿No tienes una cuenta? <Link to="/register" className="text-pq-teal font-black hover:text-pq-teal-dark transition-colors hover:underline">Regístrate aquí</Link>
+          </p>
+        </form>
       </div>
-
-      <form onSubmit={handleLogin} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="tu@correo.com"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="••••••••"
-          />
-        </div>
-
-        {errorMsg && (
-          <p className="text-red-500 text-sm text-center font-medium">{errorMsg}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
-        >
-          {loading ? 'Cargando...' : 'Ingresar'}
-        </button>
-        <p className="text-center text-sm text-gray-600 mt-4">
-          ¿No tienes una cuenta? <Link to="/register" className="text-blue-600 hover:underline font-medium">Regístrate aquí</Link>
-        </p>
-      </form>
     </div>
   );
 }

@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+@theme {
+  /* Paleta Oficial de Puriqay */
+  --color-pq-teal: #118f8c;       /* Verde agua principal */
+  --color-pq-teal-dark: #12726e;  /* Verde agua oscuro (para hovers) */
+  --color-pq-teal-deep: #21514d;  /* Verde oscuro intenso (fondos oscuros) */
+  
+  --color-pq-ink: #212121;        /* Casi negro para textos (más elegante) */
+  
+  --color-pq-cream: #f1e6d5;      /* Crema claro (Fondo principal) */
+  --color-pq-cream-dark: #eae1d3; /* Crema oscurecido (Tarjetas o bordes) */
+  
+  --color-pq-marku: #f5a623;      /* Naranja/Amarillo inspirado en la piel de Marku para acentos/alertas */
+}
+
+/* Opcional: Para que toda la app use el fondo crema y texto oscuro por defecto */
+body {
+  @apply bg-pq-cream text-pq-ink;
+}

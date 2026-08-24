@@ -64,13 +64,15 @@ export default function Dashboard() {
     return (
       <button
         onClick={() => setActiveTab(id)}
-        className={`w-full flex items-center p-3 mb-2 rounded-lg transition-colors ${
-          isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+        className={`w-full flex items-center p-3 mb-2 rounded-xl transition-all duration-200 font-medium ${
+          isActive 
+            ? 'bg-pq-teal text-white shadow-md shadow-pq-teal/30' 
+            : 'text-pq-ink/70 hover:bg-pq-cream-dark hover:text-pq-teal-dark'
         }`}
         title={!isSidebarOpen ? label : ''}
       >
-        <Icon size={24} className="min-w-[24px]" />
-        {isSidebarOpen && <span className="ml-3 font-medium truncate">{label}</span>}
+        <Icon size={22} className={`min-w-[22px] ${isActive ? 'text-white' : 'text-pq-teal-dark/70'}`} />
+        {isSidebarOpen && <span className="ml-3 truncate">{label}</span>}
       </button>
     );
   };
@@ -88,30 +90,41 @@ export default function Dashboard() {
   const isVoluntario = role === 'VOLUNTARIO';
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-pq-cream overflow-hidden">
       
       {/* BARRA LATERAL (SIDEBAR) */}
-      <div className={`bg-white border-r border-gray-200 transition-all duration-300 flex flex-col ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
+      <div className={`bg-white border-r border-pq-cream-dark transition-all duration-300 flex flex-col shadow-lg z-20 ${isSidebarOpen ? 'w-68' : 'w-20'}`}>
         
-        <div className="h-16 flex items-center justify-between px-4 border-b">
-          {isSidebarOpen && <h1 className="font-bold text-xl text-blue-600 truncate">Puriqay</h1>}
+        <div className="h-20 flex items-center justify-between px-5 border-b border-pq-cream-dark">
+          {isSidebarOpen && (
+            <div className="flex flex-col">
+              <h1 className="font-black text-2xl text-pq-teal-deep tracking-tight flex items-center gap-1">
+                Puriqay
+                <span className="w-2 h-2 rounded-full bg-pq-marku"></span>
+              </h1>
+              <span className="text-[10px] uppercase font-bold text-pq-teal-dark tracking-widest">Voluntariado</span>
+            </div>
+          )}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 ml-auto"
+            className="p-2 rounded-xl hover:bg-pq-cream text-pq-teal-deep transition-colors ml-auto"
           >
             {isSidebarOpen ? <ChevronLeft size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Indicador de Perfil (Opcional, muy útil para tus pruebas) */}
+        {/* Indicador de Perfil */}
         {isSidebarOpen && (
-          <div className="px-4 pt-4 pb-2 border-b border-gray-100">
-            <p className="text-xs font-bold text-gray-800">{role}</p>
-            <p className="text-[10px] text-gray-500 truncate uppercase">{area}</p>
+          <div className="px-5 pt-5 pb-3">
+            <div className="bg-pq-cream rounded-xl p-3 border border-pq-cream-dark/50">
+              <p className="text-xs font-black text-pq-teal-deep">{role}</p>
+              <p className="text-[10px] text-pq-ink/60 truncate uppercase font-bold mt-0.5">{area}</p>
+            </div>
           </div>
         )}
 
-        <nav className="flex-1 p-4 overflow-y-auto">
+        <nav className="flex-1 px-4 py-2 overflow-y-auto">
+          {/* ... (Aquí dejas todos tus SidebarItems intactos) ... */}
           
           {/* MÓDULOS DE GESTIÓN (EXCLUSIVOS POR ÁREA) */}
           {(isSuperAdmin || isProyectos) && <SidebarItem id="locations" label="Lugares" icon={MapPin} />}
@@ -137,14 +150,15 @@ export default function Dashboard() {
           
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
+        {/* Pie del Menú (Cerrar Sesión) */}
+        <div className="p-4 border-t border-pq-cream-dark">
           <button 
             onClick={handleLogout} 
-            className="w-full flex items-center p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center p-3 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium"
             title={!isSidebarOpen ? 'Cerrar Sesión' : ''}
           >
-            <LogOut size={24} className="min-w-[24px]" />
-            {isSidebarOpen && <span className="ml-3 font-medium truncate">Cerrar Sesión</span>}
+            <LogOut size={22} className="min-w-[22px]" />
+            {isSidebarOpen && <span className="ml-3 truncate">Cerrar Sesión</span>}
           </button>
         </div>
       </div>
@@ -197,18 +211,39 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'qr' && (
-          <div className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center mt-10">
-            <h2 className="text-2xl font-bold text-blue-600 mb-2">Mi Credencial</h2>
-            <p className="text-gray-600 mb-8">Muestra este código al llegar a las actividades.</p>
+          <div className="max-w-sm mx-auto bg-white p-8 rounded-[2.5rem] shadow-xl border-2 border-pq-cream-dark text-center mt-10 relative overflow-hidden">
+            {/* Detalle superior (estilo gafete/fotocheck) */}
+            <div className="absolute top-0 left-0 w-full h-4 bg-pq-teal"></div>
             
-            <div className="flex justify-center p-4">
+            <h2 className="text-3xl font-black text-pq-teal-deep mt-4 flex items-center justify-center gap-2">
+              Credencial <span className="w-2.5 h-2.5 rounded-full bg-pq-marku"></span>
+            </h2>
+            <p className="text-pq-ink/60 font-medium text-sm mt-3 mb-8">
+              Muestra este código al equipo de Puriqay al llegar a tus actividades.
+            </p>
+            
+            {/* Contenedor del QR */}
+            <div className="bg-white p-4 rounded-3xl border-4 border-pq-cream-dark shadow-inner inline-block relative group transition-transform hover:scale-105">
               {qrToken ? (
-                <QRCode value={qrToken} size={220} level="H" />
+                <QRCode 
+                  value={qrToken} 
+                  size={200} 
+                  level="H" 
+                  fgColor="#21514d" /* Tu color pq-teal-deep (#21514d) */
+                  bgColor="#ffffff"
+                />
               ) : (
-                <p>Generando tu QR...</p>
+                <div className="w-[200px] h-[200px] flex items-center justify-center bg-pq-cream/50 rounded-2xl">
+                  <p className="text-pq-teal-dark font-bold animate-pulse">Generando...</p>
+                </div>
               )}
             </div>
-            <p className="text-xs text-gray-400 mt-4">Token seguro: {qrToken}</p>
+            
+            {/* Caja del Token */}
+            <div className="mt-8 bg-pq-cream/30 py-3 px-4 rounded-xl border border-pq-cream-dark">
+              <p className="text-[10px] font-black text-pq-teal-dark uppercase tracking-widest mb-1">Token Seguro</p>
+              <p className="text-xs text-pq-ink/50 font-mono truncate">{qrToken}</p>
+            </div>
           </div>
         )}
 
