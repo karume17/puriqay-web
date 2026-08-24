@@ -77,7 +77,7 @@ export default function MarketingBoard() {
 
     const selectedNetworks = Object.keys(networks).filter(n => networks[n as keyof typeof networks]);
     if (selectedNetworks.length === 0) {
-      alert('Debes seleccionar al menos una red social.');
+      toast.error('Debes seleccionar al menos una red social.');
       setLoading(false);
       return;
     }
@@ -89,9 +89,9 @@ export default function MarketingBoard() {
     }]);
 
     if (error) {
-      alert('Error al crear tarea: ' + error.message);
+      toast.error('Error al crear tarea: ' + error.message);
     } else {
-      alert('¡Tarea asignada con éxito!');
+      toast.success('¡Tarea asignada con éxito!');
       setTitle(''); setCanvaUrl(''); setDraftDate(''); setPostDate('');
       setNetworks({ Facebook: false, Instagram: false, TikTok: false, LinkedIn: false });
       fetchData();
