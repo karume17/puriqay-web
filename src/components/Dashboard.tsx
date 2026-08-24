@@ -8,7 +8,7 @@ import Jornadas from './Jornadas';
 import AttendanceScanner from './AttendanceScanner';
 import AvailableJornadas from './AvailableJornadas';
 import MarketingBoard from './MarketingBoard';
-import { Users, QrCode, LogOut, ChevronLeft, Menu, CalendarDays, CalendarCheck, MapPin, Camera, ClipboardList, Megaphone } from 'lucide-react';
+import { Users, QrCode, LogOut, ChevronLeft, Menu, CalendarDays, CalendarCheck, MapPin, Camera, Megaphone } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
