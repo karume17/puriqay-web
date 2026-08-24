@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { MapPin, Phone, User, Map, Info, Activity } from 'lucide-react';
 
 type Location = {
   id: string;
   name: string;
   action_line: string;
   district: string;
+  address: string;
   manager_name: string;
+  contact_phone: string;
+  maps_link: string;
+  meeting_point: string;
+  special_instructions: string;
   status: string;
 };
 
@@ -67,21 +73,39 @@ export default function Locations() {
     setLoading(false);
   };
 
+  const inputClass = "w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:bg-white focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none transition-all font-medium text-pq-ink";
+  const labelClass = "block text-sm font-bold text-pq-teal-dark mb-2";
+
+  // Ayudante para colores según la línea de acción
+  const getActionLineColor = (line: string) => {
+    switch (line) {
+      case 'Animalista': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'Ambiental': return 'bg-green-100 text-green-700 border-green-200';
+      case 'Social': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Educativo': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'Salud': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-pq-cream text-pq-teal-dark border-pq-cream-dark';
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* FORMULARIO */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Registrar Nuevo Lugar / Aliado</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      
+      {/* FORMULARIO DE CREACIÓN */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-pq-cream-dark shadow-sm">
+        <h2 className="text-2xl font-black text-pq-teal-deep mb-6 flex items-center gap-2">
+          Registrar Nuevo Lugar / Aliado <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
+        </h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Lugar / Organización</label>
-              <input type="text" name="name" required value={formData.name} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none" placeholder="Ej: Albergue 4 Patas" />
+              <label className={labelClass}>Nombre del Lugar / Organización <span className="text-red-500">*</span></label>
+              <input type="text" name="name" required value={formData.name} onChange={handleChange} className={inputClass} placeholder="Ej: Albergue 4 Patas" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Línea de Acción</label>
-              <select name="action_line" value={formData.action_line} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg bg-white">
+              <label className={labelClass}>Línea de Acción <span className="text-red-500">*</span></label>
+              <select name="action_line" value={formData.action_line} onChange={handleChange} className={inputClass}>
                 <option value="Animalista">Animalista</option>
                 <option value="Ambiental">Ambiental</option>
                 <option value="Social">Social</option>
@@ -91,77 +115,119 @@ export default function Locations() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Encargado(a)</label>
-              <input type="text" name="manager_name" value={formData.manager_name} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg outline-none" placeholder="Nombre del contacto principal" />
+              <label className={labelClass}>Encargado(a)</label>
+              <input type="text" name="manager_name" value={formData.manager_name} onChange={handleChange} className={inputClass} placeholder="Nombre del contacto principal" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono de Contacto</label>
-              <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg outline-none" placeholder="Ej: 999888777" />
+              <label className={labelClass}>Teléfono de Contacto</label>
+              <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleChange} className={inputClass} placeholder="Ej: 999888777" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Dirección Exacta</label>
-              <input type="text" name="address" required value={formData.address} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg outline-none" />
+              <label className={labelClass}>Dirección Exacta <span className="text-red-500">*</span></label>
+              <input type="text" name="address" required value={formData.address} onChange={handleChange} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Distrito</label>
-              <input type="text" name="district" required value={formData.district} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg outline-none" placeholder="Ej: San Martín de Porres" />
+              <label className={labelClass}>Distrito <span className="text-red-500">*</span></label>
+              <input type="text" name="district" required value={formData.district} onChange={handleChange} className={inputClass} placeholder="Ej: San Martín de Porres" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Punto de Encuentro</label>
-              <input type="text" name="meeting_point" value={formData.meeting_point} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg outline-none" placeholder="Ej: Puerta principal / Estación de tren" />
+              <label className={labelClass}>Punto de Encuentro</label>
+              <input type="text" name="meeting_point" value={formData.meeting_point} onChange={handleChange} className={inputClass} placeholder="Ej: Puerta principal / Estación de tren" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Link de Google Maps</label>
-              <input type="url" name="maps_link" value={formData.maps_link} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg outline-none" placeholder="https://maps.app.goo.gl/..." />
+              <label className={labelClass}>Link de Google Maps</label>
+              <input type="url" name="maps_link" value={formData.maps_link} onChange={handleChange} className={inputClass} placeholder="https://maps.app.goo.gl/..." />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Indicaciones Especiales</label>
-            <textarea name="special_instructions" value={formData.special_instructions} onChange={handleChange} rows={2} className="w-full px-4 py-2 border rounded-lg outline-none" placeholder="Ej: Llevar botas de agua, tocar timbre rojo..."></textarea>
+            <label className={labelClass}>Indicaciones Especiales</label>
+            <textarea name="special_instructions" value={formData.special_instructions} onChange={handleChange} rows={2} className={`${inputClass} resize-none`} placeholder="Ej: Llevar botas de agua, tocar timbre rojo..."></textarea>
           </div>
 
-          <div className="flex justify-end mt-4">
-            <button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg transition">
+          <div className="flex justify-end mt-6 pt-4 border-t-2 border-dashed border-pq-cream-dark">
+            <button type="submit" disabled={loading} className="bg-pq-teal hover:bg-pq-teal-dark text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-pq-teal/30 hover:-translate-y-0.5 transition-all duration-200">
               {loading ? 'Guardando...' : 'Guardar Lugar'}
             </button>
           </div>
         </form>
       </div>
 
-      {/* LISTA */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Directorio de Lugares</h2>
-        {fetching ? <p className="text-gray-500">Cargando...</p> : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700">
-                  <th className="p-3 border-b">Nombre</th>
-                  <th className="p-3 border-b">Línea</th>
-                  <th className="p-3 border-b">Distrito</th>
-                  <th className="p-3 border-b">Encargado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {locations.map((loc) => (
-                  <tr key={loc.id} className="hover:bg-gray-50">
-                    <td className="p-3 border-b font-medium">{loc.name}</td>
-                    <td className="p-3 border-b text-gray-600">{loc.action_line}</td>
-                    <td className="p-3 border-b text-gray-600">{loc.district}</td>
-                    <td className="p-3 border-b text-gray-600">{loc.manager_name || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* DIRECTORIO DE LUGARES */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-pq-cream-dark shadow-sm">
+        <h2 className="text-2xl font-black text-pq-teal-deep mb-6 flex items-center gap-2">
+          Directorio de Lugares Aliados <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
+        </h2>
+        
+        {fetching ? (
+          <div className="flex justify-center p-10"><p className="text-pq-teal-dark font-bold animate-pulse">Cargando directorio...</p></div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+            {locations.map((loc) => (
+              <div key={loc.id} className="border-2 border-pq-cream-dark rounded-2xl p-5 bg-white hover:border-pq-teal/40 hover:shadow-lg transition-all flex flex-col justify-between group">
+                
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border flex items-center gap-1 ${getActionLineColor(loc.action_line)}`}>
+                      <Activity size={12}/> {loc.action_line}
+                    </span>
+                    {loc.maps_link && (
+                      <a href={loc.maps_link} target="_blank" rel="noreferrer" className="text-pq-teal-dark hover:text-pq-teal transition-colors" title="Ver en Maps">
+                        <Map size={18} />
+                      </a>
+                    )}
+                  </div>
+                  
+                  <h3 className="font-black text-xl text-pq-teal-deep mb-1 leading-tight group-hover:text-pq-teal transition-colors">{loc.name}</h3>
+                  <p className="text-sm text-pq-ink/70 font-medium flex items-center gap-1.5 mb-4">
+                    <MapPin size={14} className="text-pq-teal-dark/60 min-w-[14px]"/> {loc.district}
+                  </p>
+
+                  <div className="space-y-2 mb-4 bg-pq-cream/30 p-3 rounded-xl border border-pq-cream-dark/50">
+                    <div className="flex items-center gap-2 text-sm text-pq-ink/80">
+                      <User size={14} className="text-pq-teal-dark"/>
+                      <span className="font-bold">{loc.manager_name || 'Sin encargado'}</span>
+                    </div>
+                    {loc.contact_phone && (
+                      <div className="flex items-center gap-2 text-sm text-pq-ink/80">
+                        <Phone size={14} className="text-pq-teal-dark"/>
+                        <span className="font-medium">{loc.contact_phone}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {(loc.meeting_point || loc.special_instructions) && (
+                  <div className="pt-3 border-t-2 border-dashed border-pq-cream-dark">
+                    {loc.meeting_point && (
+                      <p className="text-xs text-pq-ink/70 flex gap-1 mb-1.5">
+                        <span className="font-bold text-pq-teal-dark min-w-[50px]">Punto:</span> {loc.meeting_point}
+                      </p>
+                    )}
+                    {loc.special_instructions && (
+                      <p className="text-xs text-pq-ink/70 flex gap-1 items-start">
+                        <Info size={12} className="text-pq-marku mt-0.5 min-w-[12px]"/>
+                        <span className="italic">{loc.special_instructions}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {locations.length === 0 && (
+              <div className="col-span-full text-center p-10 bg-pq-cream/50 rounded-2xl border-2 border-dashed border-pq-cream-dark">
+                <p className="text-pq-teal-dark font-medium">No tienes lugares aliados registrados aún.</p>
+              </div>
+            )}
           </div>
         )}
       </div>

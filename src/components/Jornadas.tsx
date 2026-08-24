@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { Calendar, Clock, MapPin, UserSquare2, Activity } from 'lucide-react';
 
 export default function Jornadas() {
   const [jornadas, setJornadas] = useState<any[]>([]);
@@ -80,21 +81,28 @@ export default function Jornadas() {
     setLoading(false);
   };
 
+  // Clases reutilizables para mantener el código limpio
+  const inputClass = "w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:bg-white focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none transition-all font-medium text-pq-ink";
+  const labelClass = "block text-sm font-bold text-pq-teal-dark mb-2";
+
   return (
     <div className="space-y-8">
+      
       {/* FORMULARIO DE CREACIÓN */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Programar Nueva Jornada</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-pq-cream-dark shadow-sm">
+        <h2 className="text-2xl font-black text-pq-teal-deep mb-6 flex items-center gap-2">
+          Programar Nueva Jornada <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
+        </h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de la Jornada <span className="text-red-500">*</span></label>
-              <input type="text" name="name" required value={formData.name} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none" placeholder="Ej: Limpieza de Verano" />
+              <label className={labelClass}>Nombre de la Jornada <span className="text-red-500">*</span></label>
+              <input type="text" name="name" required value={formData.name} onChange={handleChange} className={inputClass} placeholder="Ej: Limpieza de Verano" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Lugar del Voluntariado <span className="text-red-500">*</span></label>
-              <select name="location_id" required value={formData.location_id} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none bg-white">
+              <label className={labelClass}>Lugar del Voluntariado <span className="text-red-500">*</span></label>
+              <select name="location_id" required value={formData.location_id} onChange={handleChange} className={inputClass}>
                 <option value="">-- Selecciona un Lugar Aliado --</option>
                 {locations.map(loc => (
                   <option key={loc.id} value={loc.id}>{loc.name} ({loc.district})</option>
@@ -102,8 +110,8 @@ export default function Jornadas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Responsable (Interno) <span className="text-red-500">*</span></label>
-              <select name="coordinator_id" required value={formData.coordinator_id} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none bg-white">
+              <label className={labelClass}>Responsable (Interno) <span className="text-red-500">*</span></label>
+              <select name="coordinator_id" required value={formData.coordinator_id} onChange={handleChange} className={inputClass}>
                 <option value="">-- Selecciona Responsable --</option>
                 {coordinators.map(coord => (
                   <option key={coord.id} value={coord.id}>{coord.first_name} {coord.last_name}</option>
@@ -112,29 +120,29 @@ export default function Jornadas() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha <span className="text-red-500">*</span></label>
-              <input type="date" name="date" required value={formData.date} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none" />
+              <label className={labelClass}>Fecha <span className="text-red-500">*</span></label>
+              <input type="date" name="date" required value={formData.date} onChange={handleChange} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hora Inicio <span className="text-red-500">*</span></label>
-              <input type="time" name="start_time" required value={formData.start_time} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none" />
+              <label className={labelClass}>Hora Inicio <span className="text-red-500">*</span></label>
+              <input type="time" name="start_time" required value={formData.start_time} onChange={handleChange} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Hora Fin <span className="text-red-500">*</span></label>
-              <input type="time" name="end_time" required value={formData.end_time} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none" />
+              <label className={labelClass}>Hora Fin <span className="text-red-500">*</span></label>
+              <input type="time" name="end_time" required value={formData.end_time} onChange={handleChange} className={inputClass} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Horas Válidas <span className="text-red-500">*</span></label>
-              <input type="number" step="0.5" name="valid_hours" required value={formData.valid_hours} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none" placeholder="Ej: 3" />
+              <label className={labelClass}>Horas Válidas <span className="text-red-500">*</span></label>
+              <input type="number" step="0.5" name="valid_hours" required value={formData.valid_hours} onChange={handleChange} className={inputClass} placeholder="Ej: 3" />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Actividad <span className="text-red-500">*</span></label>
-              <select name="type" required value={formData.type} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none bg-white">
+              <label className={labelClass}>Tipo de Actividad <span className="text-red-500">*</span></label>
+              <select name="type" required value={formData.type} onChange={handleChange} className={inputClass}>
                 <option value="Jornada de Campo">Jornada de Campo</option>
                 <option value="Jornada Educativa">Jornada Educativa</option>
                 <option value="Reunión Virtual">Reunión Virtual</option>
@@ -143,13 +151,13 @@ export default function Jornadas() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Descripción de Actividades <span className="text-red-500">*</span></label>
-              <textarea name="description" required value={formData.description} onChange={handleChange} rows={1} className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 outline-none" placeholder="¿Qué se hará exactamente?"></textarea>
+              <label className={labelClass}>Descripción de Actividades <span className="text-red-500">*</span></label>
+              <textarea name="description" required value={formData.description} onChange={handleChange} rows={1} className={`${inputClass} resize-none`} placeholder="¿Qué se hará exactamente?"></textarea>
             </div>
           </div>
 
-          <div className="flex justify-end mt-4">
-            <button type="submit" disabled={loading || locations.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg transition duration-200">
+          <div className="flex justify-end mt-6 pt-4 border-t-2 border-dashed border-pq-cream-dark">
+            <button type="submit" disabled={loading || locations.length === 0} className="bg-pq-teal hover:bg-pq-teal-dark text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-pq-teal/30 hover:-translate-y-0.5 transition-all duration-200">
               {loading ? 'Guardando...' : 'Crear Jornada'}
             </button>
           </div>
@@ -157,46 +165,61 @@ export default function Jornadas() {
       </div>
 
       {/* LISTA DE JORNADAS */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Jornadas Programadas</h2>
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-pq-cream-dark shadow-sm">
+        <h2 className="text-2xl font-black text-pq-teal-deep mb-6 flex items-center gap-2">
+          Jornadas Programadas <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
+        </h2>
+        
         {fetching ? (
-          <p className="text-gray-500">Cargando jornadas...</p>
+          <div className="flex justify-center p-10"><p className="text-pq-teal-dark font-bold animate-pulse">Cargando jornadas...</p></div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700">
-                  <th className="p-3 border-b rounded-tl-lg">Fecha</th>
-                  <th className="p-3 border-b">Jornada</th>
-                  <th className="p-3 border-b">Lugar</th>
-                  <th className="p-3 border-b">Responsable</th>
-                  <th className="p-3 border-b">Horario</th>
-                  <th className="p-3 border-b rounded-tr-lg">Hrs</th>
-                </tr>
-              </thead>
-              <tbody>
-                {jornadas.map((jor) => (
-                  <tr key={jor.id} className="hover:bg-gray-50 transition">
-                    <td className="p-3 border-b font-medium text-blue-600">
-                      {/* MÉTODO INFALIBLE: Cortamos YYYY-MM-DD y lo invertimos a DD/MM/YYYY */}
-                      {jor.date.split('-').reverse().join('/')}
-                    </td>
-                    <td className="p-3 border-b font-medium text-gray-800">{jor.name}</td>
-                    <td className="p-3 border-b text-gray-600">{jor.locations?.name} <span className="text-xs text-gray-400">({jor.locations?.district})</span></td>
-                    <td className="p-3 border-b font-medium text-gray-800">
+          <div className="grid grid-cols-1 gap-4">
+            {jornadas.map((jor) => (
+              <div key={jor.id} className="border-2 border-pq-cream-dark rounded-2xl p-5 flex flex-col xl:flex-row gap-5 justify-between items-start xl:items-center bg-white hover:border-pq-teal/40 hover:shadow-md transition-all">
+                
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <span className="bg-pq-teal/10 text-pq-teal-dark text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-pq-teal/20 flex items-center gap-1">
+                      <Activity size={12}/> {jor.type}
+                    </span>
+                    <h3 className="font-black text-xl text-pq-teal-deep">{jor.name}</h3>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-3 text-sm text-pq-ink/80 font-medium">
+                    <span className="bg-pq-cream/50 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-pq-cream-dark/50">
+                      <MapPin size={16} className="text-pq-teal-dark"/> 
+                      {jor.locations?.name} <span className="text-xs text-pq-ink/50 ml-1">({jor.locations?.district})</span>
+                    </span>
+                    <span className="bg-pq-cream/50 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-pq-cream-dark/50">
+                      <UserSquare2 size={16} className="text-pq-teal-dark"/> 
                       {jor.profiles ? `${jor.profiles.first_name} ${jor.profiles.last_name}` : 'Sin asignar'}
-                    </td>
-                    <td className="p-3 border-b text-gray-600">{jor.start_time.slice(0,5)} - {jor.end_time.slice(0,5)}</td>
-                    <td className="p-3 border-b text-gray-600 font-bold">{jor.valid_hours}</td>
-                  </tr>
-                ))}
-                {jornadas.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="p-4 text-center text-gray-500">Aún no hay jornadas registradas.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4 text-sm bg-pq-cream/30 p-3 rounded-xl border border-pq-cream-dark w-full xl:w-auto">
+                  <div>
+                    <p className="text-xs font-bold text-pq-teal-dark uppercase tracking-wider mb-0.5 flex items-center gap-1"><Calendar size={14}/> Fecha</p>
+                    <p className="font-black text-pq-teal-deep">{jor.date.split('-').reverse().join('/')}</p>
+                  </div>
+                  <div className="border-l-2 border-pq-cream-dark pl-4">
+                    <p className="text-xs font-bold text-pq-teal-dark uppercase tracking-wider mb-0.5 flex items-center gap-1"><Clock size={14}/> Horario</p>
+                    <p className="font-black text-pq-teal-deep">{jor.start_time.slice(0,5)} - {jor.end_time.slice(0,5)}</p>
+                  </div>
+                  <div className="border-l-2 border-pq-cream-dark pl-4 pr-2">
+                    <p className="text-xs font-bold text-pq-teal-dark uppercase tracking-wider mb-0.5">Horas</p>
+                    <p className="font-black text-pq-marku text-lg leading-none">{jor.valid_hours}h</p>
+                  </div>
+                </div>
+
+              </div>
+            ))}
+            
+            {jornadas.length === 0 && (
+              <div className="text-center p-10 bg-pq-cream/50 rounded-2xl border-2 border-dashed border-pq-cream-dark">
+                <p className="text-pq-teal-dark font-medium">Aún no hay jornadas registradas.</p>
+              </div>
+            )}
           </div>
         )}
       </div>
