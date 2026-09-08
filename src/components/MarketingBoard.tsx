@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import {
   AlertCircle, Clock, CheckCircle, ExternalLink, Send, Edit3, CheckCircle2,
   Hourglass, Archive, CalendarPlus, Link2, Pencil, ChevronDown, ChevronUp,
-  Filter, ArrowUpDown, X
+  Filter, ArrowUpDown, X, Check
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import MarketingCalendar from './MarketingCalendar';
@@ -91,6 +91,10 @@ export default function MarketingBoard() {
   // en el tablero y la resaltamos brevemente (si está en la página/filtro actual).
   const taskRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
+
+  // Control inline de "Extender Plazo": qué tarea tiene el input abierto y cuántos días se van a sumar.
+  const [extendingTaskId, setExtendingTaskId] = useState<string | null>(null);
+  const [extendDays, setExtendDays] = useState(1);
 
   const handleSelectFromCalendar = (id: string) => {
     const el = taskRefs.current[id];
@@ -349,19 +353,25 @@ export default function MarketingBoard() {
     }
   };
 
-  const extendDeadline = async (task: MarketingTask) => {
+  const extendDeadline = async (task: MarketingTask, days: number) => {
+    if (!Number.isFinite(days) || days < 1) {
+      toast.error('Ingresa una cantidad válida de días.');
+      return;
+    }
+
     const newDraftDate = new Date(task.draft_date + 'T12:00:00');
-    newDraftDate.setDate(newDraftDate.getDate() + 1);
+    newDraftDate.setDate(newDraftDate.getDate() + days);
 
     const { error } = await supabase.from('marketing_tasks').update({
-      extension_days: task.extension_days + 1,
+      extension_days: task.extension_days + days,
       draft_date: newDraftDate.toISOString().split('T')[0],
     }).eq('id', task.id);
 
     if (error) {
       toast.error('Error al extender el plazo: ' + error.message);
     } else {
-      toast.success('Plazo extendido 1 día.');
+      toast.success(`Plazo extendido ${days} día${days === 1 ? '' : 's'}.`);
+      setExtendingTaskId(null);
       refreshTasks();
     }
   };
@@ -707,9 +717,29 @@ export default function MarketingBoard() {
                       )}
 
                       {isSupervisor && task.status !== 'Publicado' && (
-                        <button onClick={() => extendDeadline(task)} className="flex items-center justify-center gap-1 text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 font-bold py-2 px-3 rounded-xl transition-colors text-xs">
-                          <Hourglass size={14} /> Extender +1 día
-                        </button>
+                        extendingTaskId === task.id ? (
+                          <div className="flex items-center gap-1.5 bg-purple-50 border border-purple-200 rounded-xl p-1.5">
+                            <input
+                              type="number"
+                              min={1}
+                              value={extendDays}
+                              onChange={(e) => setExtendDays(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                              autoFocus
+                              className="w-14 text-center px-1 py-1.5 border-2 border-purple-200 rounded-lg bg-white font-bold text-purple-700 text-sm outline-none focus:border-purple-400 transition-colors"
+                            />
+                            <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider">días</span>
+                            <button onClick={() => extendDeadline(task, extendDays)} title="Confirmar" className="p-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                              <Check size={14} />
+                            </button>
+                            <button onClick={() => setExtendingTaskId(null)} title="Cancelar" className="p-1.5 text-purple-400 hover:text-purple-600 transition-colors">
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setExtendingTaskId(task.id); setExtendDays(1); }} className="flex items-center justify-center gap-1 text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 font-bold py-2 px-3 rounded-xl transition-colors text-xs">
+                            <Hourglass size={14} /> Extender Plazo
+                          </button>
+                        )
                       )}
 
                       {isSupervisor && (

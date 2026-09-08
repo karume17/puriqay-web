@@ -8,15 +8,25 @@ import Jornadas from './Jornadas';
 import AttendanceScanner from './AttendanceScanner';
 import AvailableJornadas from './AvailableJornadas';
 import MarketingBoard from './MarketingBoard';
+import CompleteProfileModal from './CompleteProfileModal';
 import { Users, QrCode, LogOut, ChevronLeft, Menu, CalendarDays, CalendarCheck, MapPin, Camera, Megaphone } from 'lucide-react';
+
+// Campos "avanzados" que Register.tsx ya no pide en la fase 1 (fricción cero).
+// Si a un perfil le falta alguno, se le bloquea el uso de la plataforma con
+// CompleteProfileModal hasta que los complete (Completado de Perfil Progresivo).
+const ADVANCED_PROFILE_FIELDS = [
+  'document_id', 'emergency_phone', 'study_center', 'career', 'address', 'medical_conditions', 'shirt_size'
+] as const;
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [area, setArea] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  
+  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('');
 
@@ -30,15 +40,17 @@ export default function Dashboard() {
 
   const checkUserRole = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       navigate('/');
       return;
     }
+    setUserId(user.id);
 
+    // Nota: esta lista de columnas debe reflejar ADVANCED_PROFILE_FIELDS de arriba.
     const { data, error } = await supabase
       .from('profiles')
-      .select('role, qr_token, area')
+      .select('role, qr_token, area, document_id, emergency_phone, study_center, career, address, medical_conditions, shirt_size')
       .eq('id', user.id)
       .single();
 
@@ -50,7 +62,12 @@ export default function Dashboard() {
       setRole(data.role);
       setArea(data.area);
       setQrToken(data.qr_token);
-      setActiveTab('available_jornadas'); 
+      setActiveTab('available_jornadas');
+
+      // El chequeo de barrera aplica a cualquier rol conocido (los únicos que existen hoy).
+      const isKnownRole = data.role === 'VOLUNTARIO' || data.role === 'COORDINADOR' || data.role === 'ADMIN';
+      const isMissingAdvancedData = ADVANCED_PROFILE_FIELDS.some(field => !data[field]);
+      setNeedsProfileCompletion(isKnownRole && isMissingAdvancedData);
     }
     setLoading(false);
   };
@@ -93,7 +110,12 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-pq-cream overflow-hidden relative">
-      
+
+      {/* BARRERA DE PERFIL INCOMPLETO: bloquea el uso de la plataforma hasta completarlo */}
+      {needsProfileCompletion && userId && (
+        <CompleteProfileModal userId={userId} onCompleted={() => setNeedsProfileCompletion(false)} />
+      )}
+
       {/* FONDO OSCURO PARA CELULARES (Aparece cuando el menú está abierto) */}
       {isSidebarOpen && (
         <div 
