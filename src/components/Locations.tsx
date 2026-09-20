@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { MapPin, Phone, User, Map, Info, Activity } from 'lucide-react';
+import { MapPin, Phone, User, Map, Info, Activity, ChevronDown, ChevronUp, Pencil, Home } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DISTRITOS_LIMA, DISTRITOS_CALLAO, ACTION_LINES, getActionLineColor } from '../lib/catalogs';
 
 type Location = {
   id: string;
@@ -17,23 +18,34 @@ type Location = {
   status: string;
 };
 
+const emptyForm = {
+  name: '',
+  action_line: 'Animalista',
+  manager_name: '',
+  contact_phone: '',
+  address: '',
+  district: '',
+  maps_link: '',
+  meeting_point: '',
+  special_instructions: '',
+  status: 'ACTIVO'
+};
+
 export default function Locations() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    action_line: 'Animalista',
-    manager_name: '',
-    contact_phone: '',
-    address: '',
-    district: '',
-    maps_link: '',
-    meeting_point: '',
-    special_instructions: '',
-    status: 'ACTIVO'
-  });
+  const [formData, setFormData] = useState(emptyForm);
+
+  // Tarjetas minimalistas: la dirección, el punto de encuentro y las indicaciones
+  // especiales quedan ocultas hasta que se hace clic en "Ver detalles".
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Edición de un lugar ya registrado (la directora puede corregir los datos).
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState(emptyForm);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     fetchLocations();
@@ -55,6 +67,53 @@ export default function Locations() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedId(prev => (prev === id ? null : id));
+  };
+
+  const openEdit = (loc: Location) => {
+    setEditingId(loc.id);
+    setEditForm({
+      name: loc.name || '',
+      action_line: loc.action_line || 'Animalista',
+      manager_name: loc.manager_name || '',
+      contact_phone: loc.contact_phone || '',
+      address: loc.address || '',
+      district: loc.district || '',
+      maps_link: loc.maps_link || '',
+      meeting_point: loc.meeting_point || '',
+      special_instructions: loc.special_instructions || '',
+      status: loc.status || 'ACTIVO',
+    });
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingEdit(true);
+
+    const { data, error } = await supabase
+      .from('locations')
+      .update(editForm)
+      .eq('id', editingId)
+      .select('id'); // .select() nos devuelve las filas realmente afectadas
+
+    if (error) {
+      toast.error('Error al actualizar el lugar: ' + error.message);
+    } else if (!data || data.length === 0) {
+      // Si RLS bloquea el UPDATE, PostgREST responde OK con 0 filas y sin error.
+      toast.error('No se pudo actualizar: la base de datos no modificó ninguna fila. Revisa las políticas RLS de la tabla locations en Supabase.');
+    } else {
+      toast.success('¡Lugar actualizado!');
+      setEditingId(null);
+      fetchLocations();
+    }
+    setSavingEdit(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -65,10 +124,7 @@ export default function Locations() {
       toast.error('Error al registrar el lugar: ' + error.message);
     } else {
       toast.success('¡Lugar registrado con éxito!');
-      setFormData({
-        name: '', action_line: 'Animalista', manager_name: '', contact_phone: '', 
-        address: '', district: '', maps_link: '', meeting_point: '', special_instructions: '', status: 'ACTIVO'
-      });
+      setFormData(emptyForm);
       fetchLocations();
     }
     setLoading(false);
@@ -77,27 +133,34 @@ export default function Locations() {
   const inputClass = "w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:bg-white focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none transition-all font-medium text-pq-ink";
   const labelClass = "block text-sm font-bold text-pq-teal-dark mb-2";
 
-  // Ayudante para colores según la línea de acción
-  const getActionLineColor = (line: string) => {
-    switch (line) {
-      case 'Animalista': return 'bg-orange-100 text-orange-700 border-orange-200';
-      case 'Ambiental': return 'bg-green-100 text-green-700 border-green-200';
-      case 'Social': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'Educativo': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'Salud': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-pq-cream text-pq-teal-dark border-pq-cream-dark';
-    }
-  };
+  // Selector de distrito reutilizado por el formulario de alta y el de edición.
+  const DistrictSelect = ({ value, onChange }: { value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
+    <select name="district" required value={value} onChange={onChange} className={inputClass}>
+      <option value="">-- Selecciona un distrito --</option>
+      <optgroup label="Lima Metropolitana">
+        {DISTRITOS_LIMA.map(d => <option key={d} value={d}>{d}</option>)}
+      </optgroup>
+      <optgroup label="Callao">
+        {DISTRITOS_CALLAO.map(d => <option key={d} value={d}>{d}</option>)}
+      </optgroup>
+    </select>
+  );
+
+  const ActionLineSelect = ({ value, onChange }: { value: string; onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }) => (
+    <select name="action_line" required value={value} onChange={onChange} className={inputClass}>
+      {ACTION_LINES.map(l => <option key={l} value={l}>{l}</option>)}
+    </select>
+  );
 
   return (
     <div className="space-y-8">
-      
+
       {/* FORMULARIO DE CREACIÓN */}
       <div className="bg-white p-6 md:p-8 rounded-3xl border border-pq-cream-dark shadow-sm">
         <h2 className="text-2xl font-black text-pq-teal-deep mb-6 flex items-center gap-2">
           Registrar Nuevo Lugar / Aliado <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
@@ -106,13 +169,7 @@ export default function Locations() {
             </div>
             <div>
               <label className={labelClass}>Línea de Acción <span className="text-red-500">*</span></label>
-              <select name="action_line" value={formData.action_line} onChange={handleChange} className={inputClass}>
-                <option value="Animalista">Animalista</option>
-                <option value="Ambiental">Ambiental</option>
-                <option value="Social">Social</option>
-                <option value="Educativo">Educativo</option>
-                <option value="Salud">Salud</option>
-              </select>
+              <ActionLineSelect value={formData.action_line} onChange={handleChange} />
             </div>
           </div>
 
@@ -134,7 +191,7 @@ export default function Locations() {
             </div>
             <div>
               <label className={labelClass}>Distrito <span className="text-red-500">*</span></label>
-              <input type="text" name="district" required value={formData.district} onChange={handleChange} className={inputClass} placeholder="Ej: San Martín de Porres" />
+              <DistrictSelect value={formData.district} onChange={handleChange} />
             </div>
           </div>
 
@@ -167,32 +224,41 @@ export default function Locations() {
         <h2 className="text-2xl font-black text-pq-teal-deep mb-6 flex items-center gap-2">
           Directorio de Lugares Aliados <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
         </h2>
-        
+
         {fetching ? (
           <div className="flex justify-center p-10"><p className="text-pq-teal-dark font-bold animate-pulse">Cargando directorio...</p></div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-            {locations.map((loc) => (
-              <div key={loc.id} className="border-2 border-pq-cream-dark rounded-2xl p-5 bg-white hover:border-pq-teal/40 hover:shadow-lg transition-all flex flex-col justify-between group">
-                
-                <div>
+            {locations.map((loc) => {
+              const isExpanded = expandedId === loc.id;
+
+              return (
+                <div key={loc.id} className={`border-2 rounded-2xl p-5 bg-white transition-all flex flex-col group ${
+                  isExpanded ? 'border-pq-teal shadow-lg' : 'border-pq-cream-dark hover:border-pq-teal/40 hover:shadow-lg'
+                }`}>
+
                   <div className="flex justify-between items-start mb-3">
                     <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border flex items-center gap-1 ${getActionLineColor(loc.action_line)}`}>
                       <Activity size={12}/> {loc.action_line}
                     </span>
-                    {loc.maps_link && (
-                      <a href={loc.maps_link} target="_blank" rel="noreferrer" className="text-pq-teal-dark hover:text-pq-teal transition-colors" title="Ver en Maps">
-                        <Map size={18} />
-                      </a>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => openEdit(loc)} title="Editar lugar" className="text-pq-teal-dark hover:text-pq-teal transition-colors">
+                        <Pencil size={16} />
+                      </button>
+                      {loc.maps_link && (
+                        <a href={loc.maps_link} target="_blank" rel="noreferrer" className="text-pq-teal-dark hover:text-pq-teal transition-colors" title="Ver en Maps">
+                          <Map size={18} />
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  
+
                   <h3 className="font-black text-xl text-pq-teal-deep mb-1 leading-tight group-hover:text-pq-teal transition-colors">{loc.name}</h3>
                   <p className="text-sm text-pq-ink/70 font-medium flex items-center gap-1.5 mb-4">
                     <MapPin size={14} className="text-pq-teal-dark/60 min-w-[14px]"/> {loc.district}
                   </p>
 
-                  <div className="space-y-2 mb-4 bg-pq-cream/30 p-3 rounded-xl border border-pq-cream-dark/50">
+                  <div className="space-y-2 bg-pq-cream/30 p-3 rounded-xl border border-pq-cream-dark/50">
                     <div className="flex items-center gap-2 text-sm text-pq-ink/80">
                       <User size={14} className="text-pq-teal-dark"/>
                       <span className="font-bold">{loc.manager_name || 'Sin encargado'}</span>
@@ -204,25 +270,45 @@ export default function Locations() {
                       </div>
                     )}
                   </div>
-                </div>
 
-                {(loc.meeting_point || loc.special_instructions) && (
-                  <div className="pt-3 border-t-2 border-dashed border-pq-cream-dark">
-                    {loc.meeting_point && (
-                      <p className="text-xs text-pq-ink/70 flex gap-1 mb-1.5">
-                        <span className="font-bold text-pq-teal-dark min-w-[50px]">Punto:</span> {loc.meeting_point}
-                      </p>
-                    )}
-                    {loc.special_instructions && (
-                      <p className="text-xs text-pq-ink/70 flex gap-1 items-start">
-                        <Info size={12} className="text-pq-marku mt-0.5 min-w-[12px]"/>
-                        <span className="italic">{loc.special_instructions}</span>
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                  {/* DETALLES COLAPSABLES: dirección, punto de encuentro e indicaciones */}
+                  {(loc.address || loc.meeting_point || loc.special_instructions) && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(loc.id)}
+                        className="w-full flex items-center justify-between mt-3 pt-3 border-t-2 border-dashed border-pq-cream-dark text-xs font-black text-pq-teal-dark uppercase tracking-wider hover:text-pq-teal transition-colors"
+                      >
+                        {isExpanded ? 'Ocultar detalles' : 'Ver detalles'}
+                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+
+                      {isExpanded && (
+                        <div className="mt-3 space-y-2">
+                          {loc.address && (
+                            <p className="text-xs text-pq-ink/70 flex gap-1.5 items-start">
+                              <Home size={12} className="text-pq-teal-dark mt-0.5 min-w-[12px]"/>
+                              <span>{loc.address}</span>
+                            </p>
+                          )}
+                          {loc.meeting_point && (
+                            <p className="text-xs text-pq-ink/70 flex gap-1">
+                              <span className="font-bold text-pq-teal-dark min-w-[50px]">Punto:</span> {loc.meeting_point}
+                            </p>
+                          )}
+                          {loc.special_instructions && (
+                            <p className="text-xs text-pq-ink/70 flex gap-1 items-start">
+                              <Info size={12} className="text-pq-marku mt-0.5 min-w-[12px]"/>
+                              <span className="italic">{loc.special_instructions}</span>
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
 
             {locations.length === 0 && (
               <div className="col-span-full text-center p-10 bg-pq-cream/50 rounded-2xl border-2 border-dashed border-pq-cream-dark">
@@ -232,6 +318,75 @@ export default function Locations() {
           </div>
         )}
       </div>
+
+      {/* MODAL DE EDICIÓN DE LUGAR */}
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-pq-ink/60 backdrop-blur-sm px-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-8 border border-pq-cream-dark my-8 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-black text-pq-teal-deep mb-6 flex items-center gap-2">
+              Editar Lugar <span className="w-2 h-2 rounded-full bg-pq-marku inline-block"></span>
+            </h3>
+
+            <form onSubmit={handleUpdate} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <label className={labelClass}>Nombre del Lugar / Organización <span className="text-red-500">*</span></label>
+                  <input type="text" name="name" required value={editForm.name} onChange={handleEditChange} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Línea de Acción <span className="text-red-500">*</span></label>
+                  <ActionLineSelect value={editForm.action_line} onChange={handleEditChange} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelClass}>Encargado(a)</label>
+                  <input type="text" name="manager_name" value={editForm.manager_name} onChange={handleEditChange} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Teléfono de Contacto</label>
+                  <input type="text" name="contact_phone" value={editForm.contact_phone} onChange={handleEditChange} className={inputClass} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <label className={labelClass}>Dirección Exacta <span className="text-red-500">*</span></label>
+                  <input type="text" name="address" required value={editForm.address} onChange={handleEditChange} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Distrito <span className="text-red-500">*</span></label>
+                  <DistrictSelect value={editForm.district} onChange={handleEditChange} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className={labelClass}>Punto de Encuentro</label>
+                  <input type="text" name="meeting_point" value={editForm.meeting_point} onChange={handleEditChange} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Link de Google Maps</label>
+                  <input type="url" name="maps_link" value={editForm.maps_link} onChange={handleEditChange} className={inputClass} />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Indicaciones Especiales</label>
+                <textarea name="special_instructions" value={editForm.special_instructions} onChange={handleEditChange} rows={3} className={`${inputClass} resize-none`}></textarea>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-8 pt-4 border-t-2 border-dashed border-pq-cream-dark">
+                <button type="button" onClick={() => setEditingId(null)} className="px-5 py-2.5 text-pq-ink/70 font-bold hover:bg-pq-cream rounded-xl transition-colors">Cancelar</button>
+                <button type="submit" disabled={savingEdit} className="px-5 py-2.5 bg-pq-teal text-white font-bold rounded-xl hover:bg-pq-teal-dark shadow-lg shadow-pq-teal/30 transition-all">
+                  {savingEdit ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

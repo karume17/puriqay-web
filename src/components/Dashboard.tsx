@@ -12,8 +12,9 @@ import CompleteProfileModal from './CompleteProfileModal';
 import { Users, QrCode, LogOut, ChevronLeft, Menu, CalendarDays, CalendarCheck, MapPin, Camera, Megaphone } from 'lucide-react';
 
 // Campos "avanzados" que Register.tsx ya no pide en la fase 1 (fricción cero).
-// Si a un perfil le falta alguno, se le bloquea el uso de la plataforma con
-// CompleteProfileModal hasta que los complete (Completado de Perfil Progresivo).
+// Solo se le exigen al equipo interno (COORDINADOR/ADMIN): si a uno de ellos le
+// falta alguno, se le bloquea la plataforma con CompleteProfileModal hasta completarlo.
+// Los voluntarios externos nunca ven ese modal.
 const ADVANCED_PROFILE_FIELDS = [
   'document_id', 'emergency_phone', 'study_center', 'career', 'address', 'medical_conditions', 'shirt_size'
 ] as const;
@@ -25,7 +26,7 @@ export default function Dashboard() {
   const [area, setArea] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
+  const [missingProfileFields, setMissingProfileFields] = useState<string[]>([]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('');
@@ -50,7 +51,7 @@ export default function Dashboard() {
     // Nota: esta lista de columnas debe reflejar ADVANCED_PROFILE_FIELDS de arriba.
     const { data, error } = await supabase
       .from('profiles')
-      .select('role, qr_token, area, document_id, emergency_phone, study_center, career, address, medical_conditions, shirt_size')
+      .select('role, qr_token, area, document_id, emergency_phone, study_center, career, address, medical_conditions, shirt_size, latitude, longitude')
       .eq('id', user.id)
       .single();
 
@@ -64,10 +65,14 @@ export default function Dashboard() {
       setQrToken(data.qr_token);
       setActiveTab('available_jornadas');
 
-      // El chequeo de barrera aplica a cualquier rol conocido (los únicos que existen hoy).
-      const isKnownRole = data.role === 'VOLUNTARIO' || data.role === 'COORDINADOR' || data.role === 'ADMIN';
-      const isMissingAdvancedData = ADVANCED_PROFILE_FIELDS.some(field => !data[field]);
-      setNeedsProfileCompletion(isKnownRole && isMissingAdvancedData);
+      // Solo el equipo interno (COORDINADOR/ADMIN) completa los datos avanzados, y
+      // se le piden únicamente los campos que tenga vacíos. Un voluntario externo se
+      // queda con el registro mínimo de la fase 1 y nunca ve ese modal; si más adelante
+      // lo promueven a interno, le aparecerá en su siguiente ingreso.
+      const esEquipoInterno = data.role === 'COORDINADOR' || data.role === 'ADMIN';
+      const camposVacios: string[] = ADVANCED_PROFILE_FIELDS.filter(field => !data[field]);
+      if (!data.latitude || !data.longitude) camposVacios.push('location');
+      setMissingProfileFields(esEquipoInterno ? camposVacios : []);
     }
     setLoading(false);
   };
@@ -112,8 +117,8 @@ export default function Dashboard() {
     <div className="flex h-screen bg-pq-cream overflow-hidden relative">
 
       {/* BARRERA DE PERFIL INCOMPLETO: bloquea el uso de la plataforma hasta completarlo */}
-      {needsProfileCompletion && userId && (
-        <CompleteProfileModal userId={userId} onCompleted={() => setNeedsProfileCompletion(false)} />
+      {missingProfileFields.length > 0 && userId && (
+        <CompleteProfileModal userId={userId} missingFields={missingProfileFields} onCompleted={() => setMissingProfileFields([])} />
       )}
 
       {/* FONDO OSCURO PARA CELULARES (Aparece cuando el menú está abierto) */}

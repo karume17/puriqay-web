@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Calendar, Clock, MapPin, UserSquare2, Activity } from 'lucide-react';
+import { Calendar, Clock, MapPin, UserSquare2, Activity, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { getActionLineColor } from '../lib/catalogs';
 
 export default function Jornadas() {
   const [jornadas, setJornadas] = useState<any[]>([]);
@@ -8,6 +9,11 @@ export default function Jornadas() {
   const [coordinators, setCoordinators] = useState<any[]>([]); 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+
+  // La descripción de cada jornada se muestra solo al hacer clic, para que la lista
+  // se mantenga compacta.
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const toggleExpand = (id: string) => setExpandedId(prev => (prev === id ? null : id));
 
   const [formData, setFormData] = useState({
     name: '',
@@ -28,7 +34,7 @@ export default function Jornadas() {
   const fetchData = async () => {
     const { data: locData } = await supabase
       .from('locations')
-      .select('id, name, district')
+      .select('id, name, district, action_line')
       .eq('status', 'ACTIVO');
     if (locData) setLocations(locData);
 
@@ -40,7 +46,7 @@ export default function Jornadas() {
 
     const { data: jorData } = await supabase
       .from('jornadas')
-      .select('*, locations(name, district), profiles(first_name, last_name)')
+      .select('*, locations(name, district, action_line), profiles(first_name, last_name)')
       .order('date', { ascending: false });
       
     if (jorData) setJornadas(jorData);
@@ -82,6 +88,10 @@ export default function Jornadas() {
   };
 
   // Clases reutilizables para mantener el código limpio
+  // La línea de acción no se elige a mano: la hereda el lugar del voluntariado,
+  // para que no se pueda marcar "Ambiental" en un albergue animalista.
+  const selectedLocation = locations.find(l => l.id === formData.location_id);
+
   const inputClass = "w-full px-4 py-3 border-2 border-pq-cream-dark rounded-xl bg-pq-cream/30 focus:bg-white focus:border-pq-teal focus:ring-4 focus:ring-pq-teal/10 outline-none transition-all font-medium text-pq-ink";
   const labelClass = "block text-sm font-bold text-pq-teal-dark mb-2";
 
@@ -108,6 +118,14 @@ export default function Jornadas() {
                   <option key={loc.id} value={loc.id}>{loc.name} ({loc.district})</option>
                 ))}
               </select>
+              {selectedLocation && (
+                <p className="mt-2 text-xs font-medium text-pq-ink/60 flex items-center gap-1.5">
+                  Línea de acción:
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider border flex items-center gap-1 ${getActionLineColor(selectedLocation.action_line)}`}>
+                    <Activity size={10}/> {selectedLocation.action_line}
+                  </span>
+                </p>
+              )}
             </div>
             <div>
               <label className={labelClass}>Responsable (Interno) <span className="text-red-500">*</span></label>
@@ -144,7 +162,7 @@ export default function Jornadas() {
               <label className={labelClass}>Tipo de Actividad <span className="text-red-500">*</span></label>
               <select name="type" required value={formData.type} onChange={handleChange} className={inputClass}>
                 <option value="Jornada de Campo">Jornada de Campo</option>
-                <option value="Jornada Educativa">Jornada Educativa</option>
+                <option value="Taller / Charla">Taller / Charla</option>
                 <option value="Reunión Virtual">Reunión Virtual</option>
                 <option value="Capacitación">Capacitación</option>
                 <option value="Otro">Otro</option>
@@ -182,6 +200,11 @@ export default function Jornadas() {
                     <span className="bg-pq-teal/10 text-pq-teal-dark text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-pq-teal/20 flex items-center gap-1">
                       <Activity size={12}/> {jor.type}
                     </span>
+                    {jor.locations?.action_line && (
+                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border flex items-center gap-1 ${getActionLineColor(jor.locations.action_line)}`}>
+                        {jor.locations.action_line}
+                      </span>
+                    )}
                     <h3 className="font-black text-xl text-pq-teal-deep">{jor.name}</h3>
                   </div>
                   
@@ -195,6 +218,26 @@ export default function Jornadas() {
                       {jor.profiles ? `${jor.profiles.first_name} ${jor.profiles.last_name}` : 'Sin asignar'}
                     </span>
                   </div>
+
+                  {jor.description && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(jor.id)}
+                        className="flex items-center gap-1.5 mt-3 text-xs font-black text-pq-teal-dark uppercase tracking-wider hover:text-pq-teal transition-colors"
+                      >
+                        <FileText size={14} />
+                        {expandedId === jor.id ? 'Ocultar actividades' : 'Ver actividades'}
+                        {expandedId === jor.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+
+                      {expandedId === jor.id && (
+                        <p className="mt-2 text-sm text-pq-ink/70 font-medium bg-pq-cream/30 p-3 rounded-xl border border-pq-cream-dark/50">
+                          {jor.description}
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-4 text-sm bg-pq-cream/30 p-3 rounded-xl border border-pq-cream-dark w-full xl:w-auto">
