@@ -44,4 +44,6 @@ Puriqay is a volunteer-management single-page app for a Peruvian volunteering or
 
 **Feedback conventions:** `react-hot-toast` is the standard for success/error messages, with a single `<Toaster>` styled once in `App.tsx`. `Jornadas.tsx` still uses native `alert()` for its create-jornada flow — that's a legacy holdout, not the pattern to follow for new code.
 
+**Email templates:** the Supabase Auth email templates live in [supabase/email-templates/](supabase/email-templates/) — they are **not** compiled with the app; paste them by hand into Supabase under `Authentication → Emails`. They use Go-template vars (`{{ .ConfirmationURL }}`, `{{ .Data.first_name }}` from the `signUp` metadata) and inline-styled tables because email clients do not support flexbox or external CSS.
+
 **Deployment:** `public/_redirects` (`/* /index.html 200`) rewrites all paths to `index.html`, i.e. this is hosted as a static SPA on a Netlify/Cloudflare-Pages-style host. Keep client-side routing working under that rewrite-everything-to-index assumption.
