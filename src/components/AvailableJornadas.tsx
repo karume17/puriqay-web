@@ -42,11 +42,23 @@ export default function AvailableJornadas() {
     const today = new Date().toISOString().split('T')[0];
     const { data: jorData } = await supabase
       .from('jornadas')
-      .select('*, locations(name, district, meeting_point)')
+      .select('*')
       .gte('date', today)
       .order('date', { ascending: true });
-    
-    if (jorData) setJornadas(jorData);
+
+    // El lugar se lee de la vista locations_publicas, que expone solo nombre,
+    // distrito y punto de encuentro. La tabla locations completa (con telefonos
+    // y direccion de los aliados) queda reservada al equipo interno, asi que no
+    // se puede usar el join embebido de PostgREST: unimos aqui por location_id.
+    const { data: locData } = await supabase
+      .from('locations_publicas')
+      .select('id, name, district, meeting_point');
+
+    if (jorData) {
+      const lugares: Record<string, any> = {};
+      (locData || []).forEach(loc => { lugares[loc.id] = loc; });
+      setJornadas(jorData.map(jor => ({ ...jor, locations: lugares[jor.location_id] || null })));
+    }
 
     const { data: insData } = await supabase
       .from('inscripciones')
