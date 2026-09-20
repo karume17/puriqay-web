@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [missingProfileFields, setMissingProfileFields] = useState<string[]>([]);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('');
@@ -55,8 +56,13 @@ export default function Dashboard() {
       .eq('id', user.id)
       .single();
 
+    // Si el perfil no se puede leer (RLS, fila inexistente, etc.) no dejamos un
+    // dashboard fantasma: mostramos el motivo real en pantalla.
     if (error) {
       console.error("Error al cargar el perfil:", error.message);
+      setProfileError(error.message);
+    } else if (!data) {
+      setProfileError("No encontramos tu fila en la tabla profiles.");
     }
 
     if (data) {
@@ -105,6 +111,30 @@ export default function Dashboard() {
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-500 font-medium">Cargando Puriqay...</div>;
+
+  // Sin perfil no hay rol, y sin rol el menú saldría vacío: es mejor decir qué pasó.
+  if (profileError) {
+    return (
+      <div className="min-h-screen bg-pq-cream flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-pq-cream-dark text-center">
+          <h2 className="text-2xl font-black text-pq-teal-deep">No pudimos cargar tu perfil</h2>
+          <p className="text-sm text-pq-ink/70 font-medium mt-3">
+            Tu cuenta existe, pero la aplicación no logró leer tus datos de la base.
+            Avisa al equipo de Puriqay con este detalle:
+          </p>
+          <p className="text-xs font-mono text-red-600 bg-red-50 border border-red-100 rounded-xl p-3 mt-4 break-words">
+            {profileError}
+          </p>
+          <button
+            onClick={handleLogout}
+            className="w-full mt-6 bg-pq-teal hover:bg-pq-teal-dark text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-pq-teal/30 transition-all"
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const isSuperAdmin = (area === 'Gerencia General' || area === 'Tecnologías de la Información') && role === 'ADMIN';
   const isProyectos = area === 'Gestión de Proyectos Sociales' && role === 'ADMIN';
