@@ -204,3 +204,55 @@ select grantee, privilege_type from information_schema.role_table_grants
 where table_schema = 'public' and table_name = '<vista>'
 order by grantee, privilege_type;
 ```
+
+---
+
+# PLAN DE PRUEBAS
+
+Cosas que se cambiaron y conviene probar antes de considerar el sistema listo.
+Ordenadas por riesgo: las primeras son las que podrían estar rotas por RLS.
+
+## A. Flujos que dependen de políticas RLS (alto riesgo)
+
+- [ ] **Voluntario se inscribe a una jornada** → botón "Inscribirme a esta jornada".
+      Debe guardar y mostrar "Ya estás inscrito". (Política `inscripciones_propias`)
+- [ ] **Coordinador confirma/justifica asistencia** → "Sí, asistiré" / "No asistiré".
+- [ ] **Coordinador escanea un QR** → módulo "Control de Asistencia".
+      Debe encontrar al voluntario y registrar la asistencia.
+      (Necesita leer `profiles` por `qr_token` + insertar en `asistencias`)
+- [ ] **Admin edita un lugar** → botón del lápiz en Lugares, cambia algo y guarda.
+      Si sale el error rojo de "no actualizó ninguna fila", falta política de UPDATE.
+- [ ] **Módulo Marketing** → crear tarea, enviar a revisión, aprobar, extender plazo,
+      archivar. (Política `marketing_interno`)
+- [ ] **Coordinador con perfil incompleto** → debe salirle el modal pidiendo SOLO
+      los campos vacíos, y al guardar no debe volver a pedirlos en el siguiente login.
+
+## B. Prueba de seguridad (la que demuestra que locations quedó cerrado)
+
+Con sesión de **VOLUNTARIO** abierta, F12 → Console. Reemplaza TU_URL y TU_ANON_KEY
+por los valores de tu archivo `.env`:
+
+```js
+const k = Object.keys(localStorage).find(x => x.includes('auth-token'));
+const token = JSON.parse(localStorage.getItem(k)).access_token;
+const r = await fetch('TU_URL/rest/v1/locations?select=*', {
+  headers: { apikey: 'TU_ANON_KEY', Authorization: 'Bearer ' + token }
+});
+console.log(await r.json());
+```
+
+- [ ] Debe devolver `[]` (vacío). Si devuelve los lugares con `contact_phone`,
+      el cierre no quedó aplicado.
+
+## C. Validaciones de formularios (recién desplegadas)
+
+- [ ] **Crear lugar**: teléfono con letras o con más de 9 dígitos debe ser rechazado;
+      los campos nuevos no deben dejar guardar vacíos
+- [ ] **Registro**: contraseña corta o sin símbolo debe ser rechazada antes de enviar;
+      nombres con números deben ser rechazados
+
+## D. Correo (después de terminar la Tarea 3)
+
+- [ ] Registro con correo externo → llega el correo CON diseño Puriqay
+- [ ] El enlace del correo funciona y activa la cuenta
+- [ ] Tras confirmar, el nombre y celular ya están guardados en `profiles`
