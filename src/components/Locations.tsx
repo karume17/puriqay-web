@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { MapPin, Phone, User, Map, Info, Activity, ChevronDown, ChevronUp, Pencil, Home } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DISTRITOS_LIMA, DISTRITOS_CALLAO, ACTION_LINES, getActionLineColor } from '../lib/catalogs';
+import { PATTERNS, TITLES } from '../lib/validations';
 
 type Location = {
   id: string;
@@ -175,12 +176,12 @@ export default function Locations() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelClass}>Encargado(a)</label>
-              <input type="text" name="manager_name" value={formData.manager_name} onChange={handleChange} className={inputClass} placeholder="Nombre del contacto principal" />
+              <label className={labelClass}>Encargado(a) <span className="text-red-500">*</span></label>
+              <input type="text" name="manager_name" required pattern={PATTERNS.soloLetras} title={TITLES.soloLetras} value={formData.manager_name} onChange={handleChange} className={inputClass} placeholder="Nombre del contacto principal" />
             </div>
             <div>
-              <label className={labelClass}>Teléfono de Contacto</label>
-              <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleChange} className={inputClass} placeholder="Ej: 999888777" />
+              <label className={labelClass}>Teléfono de Contacto <span className="text-xs font-medium text-pq-ink/50">(9 números)</span> <span className="text-red-500">*</span></label>
+              <input type="text" name="contact_phone" required maxLength={9} inputMode="numeric" pattern={PATTERNS.celular} title={TITLES.celular} value={formData.contact_phone} onChange={handleChange} className={inputClass} placeholder="Ej: 999888777" />
             </div>
           </div>
 
@@ -197,18 +198,18 @@ export default function Locations() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelClass}>Punto de Encuentro</label>
-              <input type="text" name="meeting_point" value={formData.meeting_point} onChange={handleChange} className={inputClass} placeholder="Ej: Puerta principal / Estación de tren" />
+              <label className={labelClass}>Punto de Encuentro <span className="text-red-500">*</span></label>
+              <input type="text" name="meeting_point" required value={formData.meeting_point} onChange={handleChange} className={inputClass} placeholder="Ej: Puerta principal / Estación de tren" />
             </div>
             <div>
-              <label className={labelClass}>Link de Google Maps</label>
-              <input type="url" name="maps_link" value={formData.maps_link} onChange={handleChange} className={inputClass} placeholder="https://maps.app.goo.gl/..." />
+              <label className={labelClass}>Link de Google Maps <span className="text-red-500">*</span></label>
+              <input type="url" name="maps_link" required value={formData.maps_link} onChange={handleChange} className={inputClass} placeholder="https://maps.app.goo.gl/..." />
             </div>
           </div>
 
           <div>
-            <label className={labelClass}>Indicaciones Especiales</label>
-            <textarea name="special_instructions" value={formData.special_instructions} onChange={handleChange} rows={2} className={`${inputClass} resize-none`} placeholder="Ej: Llevar botas de agua, tocar timbre rojo..."></textarea>
+            <label className={labelClass}>Indicaciones Especiales <span className="text-red-500">*</span></label>
+            <textarea name="special_instructions" required value={formData.special_instructions} onChange={handleChange} rows={2} className={`${inputClass} resize-none`} placeholder="Ej: Llevar botas de agua, tocar timbre rojo..."></textarea>
           </div>
 
           <div className="flex justify-end mt-6 pt-4 border-t-2 border-dashed border-pq-cream-dark">
@@ -341,12 +342,12 @@ export default function Locations() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className={labelClass}>Encargado(a)</label>
-                  <input type="text" name="manager_name" value={editForm.manager_name} onChange={handleEditChange} className={inputClass} />
+                  <label className={labelClass}>Encargado(a) <span className="text-red-500">*</span></label>
+                  <input type="text" name="manager_name" required pattern={PATTERNS.soloLetras} title={TITLES.soloLetras} value={editForm.manager_name} onChange={handleEditChange} className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>Teléfono de Contacto</label>
-                  <input type="text" name="contact_phone" value={editForm.contact_phone} onChange={handleEditChange} className={inputClass} />
+                  <label className={labelClass}>Teléfono de Contacto <span className="text-xs font-medium text-pq-ink/50">(9 números)</span> <span className="text-red-500">*</span></label>
+                  <input type="text" name="contact_phone" required maxLength={9} inputMode="numeric" pattern={PATTERNS.celular} title={TITLES.celular} value={editForm.contact_phone} onChange={handleEditChange} className={inputClass} />
                 </div>
               </div>
 
@@ -363,18 +364,18 @@ export default function Locations() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className={labelClass}>Punto de Encuentro</label>
-                  <input type="text" name="meeting_point" value={editForm.meeting_point} onChange={handleEditChange} className={inputClass} />
+                  <label className={labelClass}>Punto de Encuentro <span className="text-red-500">*</span></label>
+                  <input type="text" name="meeting_point" required value={editForm.meeting_point} onChange={handleEditChange} className={inputClass} />
                 </div>
                 <div>
-                  <label className={labelClass}>Link de Google Maps</label>
-                  <input type="url" name="maps_link" value={editForm.maps_link} onChange={handleEditChange} className={inputClass} />
+                  <label className={labelClass}>Link de Google Maps <span className="text-red-500">*</span></label>
+                  <input type="url" name="maps_link" required value={editForm.maps_link} onChange={handleEditChange} className={inputClass} />
                 </div>
               </div>
 
               <div>
-                <label className={labelClass}>Indicaciones Especiales</label>
-                <textarea name="special_instructions" value={editForm.special_instructions} onChange={handleEditChange} rows={3} className={`${inputClass} resize-none`}></textarea>
+                <label className={labelClass}>Indicaciones Especiales <span className="text-red-500">*</span></label>
+                <textarea name="special_instructions" required value={editForm.special_instructions} onChange={handleEditChange} rows={3} className={`${inputClass} resize-none`}></textarea>
               </div>
 
               <div className="flex justify-end gap-3 mt-8 pt-4 border-t-2 border-dashed border-pq-cream-dark">
