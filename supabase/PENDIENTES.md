@@ -33,17 +33,17 @@ funciona igual con la verificación prendida o apagada.
 
 ---
 
-## TAREA 3 — Conectar Resend a Supabase (solo si el dominio dice "Verified")
+## TAREA 3 — Conectar Resend a Supabase ✅ COMPLETADA (28-sep)
 
 ### 3.1 Crear la API key
 - [x] Resend → `API Keys` → **Create API Key** (permiso: Sending access, dominio: puriqay.org)
-- [ ] Nombre: `supabase-smtp` · Permiso: **Sending access**
-- [ ] Cópiala (empieza con `re_`). Solo se muestra una vez.
-- [ ] **NO la guardes en este archivo ni en ningún otro del repo**: va directo al campo
+- [x] Nombre: `supabase-smtp` · Permiso: **Sending access**
+- [x] Cópiala (empieza con `re_`). Solo se muestra una vez.
+- [x] **NO la guardes en este archivo ni en ningún otro del repo**: va directo al campo
       Password de Supabase. GitHub bloquea los push que contienen claves.
 
 ### 3.2 Configurar el SMTP
-- [ ] Supabase → `Authentication` → `Emails` → pestaña **SMTP Settings**
+- [x] Supabase → `Authentication` → `Emails` → pestaña **SMTP Settings**
       (o: `Project Settings` → `Authentication` → sección **SMTP Settings**)
 - [x] Activa **Enable Custom SMTP** y llena:
 
@@ -56,16 +56,16 @@ funciona igual con la verificación prendida o apagada.
 | Username | `resend` (esa palabra literal, no tu correo) |
 | Password | la API key `re_...` |
 
-- [ ] **Save**
+- [x] **Save**
 
 ### 3.3 Subir el límite de correos
-- [ ] Supabase → `Authentication` → `Rate Limits` → busca **"Emails per hour"**
-- [ ] Súbelo a **100** → Save
+- [x] Supabase → `Authentication` → `Rate Limits` → busca **"Emails per hour"**
+- [x] Súbelo a **100** → Save
 
 ### 3.4 Poner el diseño Puriqay al correo
-- [ ] Supabase → `Authentication` → `Emails` → `Templates` → **"Confirm signup"**
-- [ ] Borra todo el contenido y pega el archivo `supabase/email-templates/confirm-signup.html`
-- [ ] Save
+- [x] Supabase → `Authentication` → `Emails` → `Templates` → **"Confirm signup"**
+- [x] Borra todo el contenido y pega el archivo `supabase/email-templates/confirm-signup.html`
+- [x] Save
 
 ### 3.4b PROBAR el SMTP antes de reactivar la verificación
 
@@ -73,20 +73,20 @@ No reactives "Confirm email" a ciegas: si el SMTP quedó mal, vuelves a bloquear
 el registro de todos. Pruébalo primero con un correo de invitación:
 
 - [x] Supabase → `Authentication` → `Users` → botón **Invite user**
-- [ ] Escribe un correo externo (uno que NO sea de tu organización Supabase)
+- [x] Escribe un correo externo (uno que NO sea de tu organización Supabase)
 - [x] Si el correo **llega** → el SMTP funciona ✅ (llegó a spam, ver nota al final)
 - [ ] Si **no llega** → revisa Host/Port/Username/Password. El Username es la
       palabra `resend`, no tu correo. Y en Resend → `Logs` ves si el envío salió.
 - [ ] Borra ese usuario de prueba después
 
 ### 3.5 Reactivar la verificación
-- [ ] Vuelve a `Authentication` → `Sign In / Providers` → **Email** → activa **"Confirm email"** → Save
-- [ ] `Authentication` → `URL Configuration` → **Site URL**: pon la URL real de la app
+- [x] Vuelve a `Authentication` → `Sign In / Providers` → **Email** → activa **"Confirm email"** → Save
+- [x] `Authentication` → `URL Configuration` → **Site URL**: pon la URL real de la app
       (la de Netlify o el dominio), NO `localhost`
 
 ### 3.6 Probar
-- [ ] Regístrate con un correo que NO sea el tuyo (pídele a alguien del equipo)
-- [ ] Debe llegar el correo con diseño Puriqay desde `no-responder@puriqay.org`
+- [x] Regístrate con un correo que NO sea el tuyo (pídele a alguien del equipo)
+- [x] Debe llegar el correo con diseño Puriqay desde `no-responder@puriqay.org`
 
 ---
 
@@ -127,8 +127,8 @@ for select to authenticated using (public.es_equipo_interno());
 ```
 
 ### 4.3 Verificar
-- [ ] Recarga la app como VOLUNTARIO → en "Próximas Jornadas" el lugar **sigue apareciendo**
-- [ ] Entra como ADMIN → el módulo "Lugares" sigue mostrando todo (teléfonos incluidos)
+- [x] Recarga la app como VOLUNTARIO → en "Próximas Jornadas" el lugar **sigue apareciendo**
+- [x] Entra como ADMIN → el módulo "Lugares" sigue mostrando todo (teléfonos incluidos)
 
 ### 4.4 Si algo se rompió, revertir
 
@@ -214,15 +214,15 @@ Ordenadas por riesgo: las primeras son las que podrían estar rotas por RLS.
 
 ## A. Flujos que dependen de políticas RLS (alto riesgo)
 
-- [ ] **Voluntario se inscribe a una jornada** → botón "Inscribirme a esta jornada".
+- [x] **Voluntario se inscribe a una jornada** → botón "Inscribirme a esta jornada".
       Debe guardar y mostrar "Ya estás inscrito". (Política `inscripciones_propias`)
-- [ ] **Coordinador confirma/justifica asistencia** → "Sí, asistiré" / "No asistiré".
-- [ ] **Coordinador escanea un QR** → módulo "Control de Asistencia".
+- [x] **Coordinador confirma/justifica asistencia** → "Sí, asistiré" / "No asistiré".
+- [x] **Coordinador escanea un QR** → módulo "Control de Asistencia".
       Debe encontrar al voluntario y registrar la asistencia.
       (Necesita leer `profiles` por `qr_token` + insertar en `asistencias`)
-- [ ] **Admin edita un lugar** → botón del lápiz en Lugares, cambia algo y guarda.
+- [x] **Admin edita un lugar** → botón del lápiz en Lugares, cambia algo y guarda.
       Si sale el error rojo de "no actualizó ninguna fila", falta política de UPDATE.
-- [ ] **Módulo Marketing** → crear tarea, enviar a revisión, aprobar, extender plazo,
+- [x] **Módulo Marketing** → crear tarea, enviar a revisión, aprobar, extender plazo,
       archivar. (Política `marketing_interno`)
 - [ ] **Coordinador con perfil incompleto** → debe salirle el modal pidiendo SOLO
       los campos vacíos, y al guardar no debe volver a pedirlos en el siguiente login.
@@ -241,7 +241,7 @@ const r = await fetch('TU_URL/rest/v1/locations?select=*', {
 console.log(await r.json());
 ```
 
-- [ ] Debe devolver `[]` (vacío). Si devuelve los lugares con `contact_phone`,
+- [x] Debe devolver `[]` (vacío). Si devuelve los lugares con `contact_phone`,
       el cierre no quedó aplicado.
 
 ## C. Validaciones de formularios (recién desplegadas)
@@ -253,6 +253,88 @@ console.log(await r.json());
 
 ## D. Correo (después de terminar la Tarea 3)
 
-- [ ] Registro con correo externo → llega el correo CON diseño Puriqay
-- [ ] El enlace del correo funciona y activa la cuenta
+- [x] Registro con correo externo → llega el correo CON diseño Puriqay
+- [x] El enlace del correo funciona y activa la cuenta
 - [ ] Tras confirmar, el nombre y celular ya están guardados en `profiles`
+
+---
+
+## [x] Endurecimiento de permisos (completado 28-sep)
+
+Aplicado con `supabase/sql/endurecer_permisos.sql`:
+
+- `anon` (visitante sin sesión) quedó sin ningún permiso sobre las 5 tablas
+- `TRUNCATE`, `REFERENCES` y `TRIGGER` revocados a `authenticated`
+  (importante: **TRUNCATE no pasa por RLS**, permitía vaciar una tabla entera)
+- Trigger `trg_profiles_guard`: bloquea cambios a `role`, `area`, `is_active`,
+  `qr_token`, `email` e `id` salvo que la sesión sea ADMIN o backend
+
+Estado verificado:
+
+| tabla | authenticated |
+|---|---|
+| asistencias, inscripciones, jornadas, locations, marketing_tasks | DELETE, INSERT, SELECT, UPDATE |
+| profiles | SELECT (+ UPDATE en 13 columnas no sensibles) |
+| locations_publicas | SELECT |
+
+`anon`: sin permisos en ninguna tabla.
+
+---
+
+## Nota: la etiqueta roja "UNRESTRICTED" en `locations_publicas`
+
+En el Table Editor, `locations_publicas` aparece con una etiqueta roja
+**UNRESTRICTED**. **No es un problema y no hay que arreglarlo.**
+
+Esa etiqueta significa literalmente "este objeto no tiene RLS activado".
+En Postgres **las vistas no pueden tener RLS** — RLS es una característica de
+tablas. Así que Supabase marca en rojo toda vista del esquema `public`, aunque
+esté bien protegida. Por eso ninguna tabla de la lista la tiene y la vista sí.
+
+La vista está protegida por otras dos vías:
+
+1. **Solo contiene 4 columnas inofensivas** (`id`, `name`, `district`,
+   `meeting_point`). `contact_phone`, `manager_name`, `address` y
+   `special_instructions` ni siquiera existen dentro de la vista, no hay forma de
+   leerlos desde ahí.
+2. **Permisos:** `anon` no tiene ninguno (hace falta sesión iniciada) y
+   `authenticated` solo tiene `SELECT` (no se puede escribir ni borrar a través
+   de ella).
+
+Y es **a propósito** que la vista se salte el RLS de `locations`: justamente
+existe para que un voluntario vea el nombre y el punto de encuentro del lugar
+sin poder leer la tabla completa.
+
+Verificar cuando haga falta:
+
+```sql
+-- 1. Qué columnas expone realmente la vista (deben ser solo 4)
+select column_name from information_schema.columns
+where table_schema = 'public' and table_name = 'locations_publicas';
+
+-- 2. Quién puede hacer qué (debe salir solo: authenticated | SELECT)
+select grantee, privilege_type from information_schema.role_table_grants
+where table_schema = 'public' and table_name = 'locations_publicas';
+```
+
+---
+
+## Resultado de las pruebas funcionales (28-sep) ✅
+
+Se probó el sistema completo con RLS activo. **Las 5 pruebas pasaron**, es decir
+las políticas quedaron ni muy flojas (nadie entra de más) ni muy apretadas
+(los flujos legítimos siguen funcionando):
+
+| Prueba | Política que valida | Resultado |
+|---|---|---|
+| Crear lugar y jornada (ADMIN) | `locations_admin`, `jornadas_admin` | OK |
+| Voluntario se inscribe | `inscripciones_propias` + `locations_publicas` | OK |
+| Coordinador confirma / justifica | `inscripciones_propias` | OK |
+| Escanear QR (+ duplicado) | `profiles_select` + `asistencias_interno` | OK |
+| Admin edita lugar (persiste tras F5) | `locations_admin` UPDATE | OK |
+| Marketing: crear → extender → revisión → publicar → archivar | `marketing_interno` | OK |
+
+Detalle relevante: al escanear, la tabla "Últimos Registros" mostró el **nombre
+completo** del voluntario, no "Sin nombre". Eso confirma que el join embebido
+`asistencias → profiles` sigue permitido para el equipo interno, que era el
+riesgo equivalente al que sí rompió `locations` en su momento.
