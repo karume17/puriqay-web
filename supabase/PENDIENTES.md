@@ -255,7 +255,7 @@ console.log(await r.json());
 
 - [x] Registro con correo externo → llega el correo CON diseño Puriqay
 - [x] El enlace del correo funciona y activa la cuenta
-- [ ] Tras confirmar, el nombre y celular ya están guardados en `profiles`
+- [x] Tras confirmar, el nombre y celular ya están guardados en `profiles`
 
 ---
 
@@ -338,3 +338,42 @@ Detalle relevante: al escanear, la tabla "Últimos Registros" mostró el **nombr
 completo** del voluntario, no "Sin nombre". Eso confirma que el join embebido
 `asistencias → profiles` sigue permitido para el equipo interno, que era el
 riesgo equivalente al que sí rompió `locations` en su momento.
+
+---
+
+## Verificación del registro por formulario (28-sep) ✅
+
+Se comprobó en vivo que la cadena completa funciona: formulario → metadata del
+`signUp` → trigger `handle_new_user` → fila en `profiles` con `first_name`,
+`phone`, `role = 'VOLUNTARIO'` y `qr_token` generado.
+
+**Ojo con un falso positivo al auditar esto.** Comparar `profiles` a secas no
+sirve: casi todas las cuentas del proyecto fueron sembradas a mano desde el panel
+y tienen los campos llenos sin haber pasado nunca por el trigger. La query que sí
+distingue compara contra `auth.users.raw_user_meta_data`, que **solo** se llena
+cuando la cuenta nace de un `signUp` del formulario:
+
+```sql
+select u.email,
+       u.raw_user_meta_data->>'first_name' as meta_nombre,
+       p.first_name as perfil_nombre,
+       (p.qr_token is not null) as tiene_qr
+from auth.users u
+left join public.profiles p on p.id = u.id
+order by u.created_at;
+```
+
+### Cuentas huérfanas (sin fila en `profiles`)
+
+Quedaron 4 cuentas en `auth.users` sin perfil, todas anteriores al arreglo del
+trigger: `dasdasads@`, `gjalejo.cas@`, `barazordapedro0@` y `sabreraita@`.
+Son de prueba y se borran, no se repararon.
+
+Síntoma si vuelve a pasar: el usuario entra y ve la pantalla de error de
+`Dashboard.tsx` en vez del panel, porque no encuentra su fila de `profiles`.
+
+**Un trigger roto NO produce esto.** Si `handle_new_user` falla, Postgres cancela
+toda la transacción y la cuenta de auth tampoco se crea (el usuario ve "Database
+error saving new user"). Que exista la cuenta pero no el perfil significa que en
+ese momento el trigger no existía, o que alguien borró la fila de `profiles` a
+mano sin borrar el usuario de auth.

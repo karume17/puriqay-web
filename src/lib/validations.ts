@@ -7,12 +7,18 @@
 //
 // Nota: se usan clases explícitas ([0-9] en vez de \d) a propósito. En un string de
 // JS, "\d" se colapsa a "d" y el patrón terminaría exigiendo la letra d.
+//
+// IMPORTANTE: dentro de una clase [...] hay que escapar el guion y la barra (\- y \/).
+// Los navegadores compilan `pattern` con la bandera `v`, que los trata como caracteres
+// reservados, y si el patrón no compila la spec manda IGNORARLO por completo: el campo
+// se queda SIN validación, en silencio y sin error en consola. No quitar esos escapes
+// aunque parezcan innecesarios (con la bandera `u` antigua sí lo serían).
 
 const LETRAS = "A-Za-zÁÉÍÓÚÜÑáéíóúüñ";
 
 export const PATTERNS = {
   // Solo letras y espacios; permite nombres compuestos ("Ana María", "D'Angelo", "Vargas-Llosa").
-  soloLetras: `[${LETRAS}]+(?:[ '-][${LETRAS}]+)*`,
+  soloLetras: `[${LETRAS}]+(?:[ '\\-][${LETRAS}]+)*`,
 
   // DNI peruano: exactamente 8 dígitos.
   dni: "[0-9]{8}",
@@ -21,9 +27,9 @@ export const PATTERNS = {
   celular: "[0-9]{9}",
 
   // Dirección: debe combinar letras y números (ej. "Av. Los Olivos 123").
-  direccion: `(?=.*[${LETRAS}])(?=.*[0-9])[${LETRAS}0-9 .,#°/-]+`,
+  direccion: `(?=.*[${LETRAS}])(?=.*[0-9])[${LETRAS}0-9 .,#°\\/\\-]+`,
 
-  // Contraseña: mínimo 6 caracteres, combinando al menos una letra y un número.
+  // Contraseña: mínimo 10 caracteres, con minúscula, mayúscula, número y símbolo.
   password: "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{10,}",
 } as const;
 
