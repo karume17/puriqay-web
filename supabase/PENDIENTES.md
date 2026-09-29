@@ -251,6 +251,15 @@ console.log(await r.json());
 - [ ] **Registro**: contraseña corta o sin símbolo debe ser rechazada antes de enviar;
       nombres con números deben ser rechazados
 
+> **Bug encontrado y corregido el 28-sep:** 7 campos estaban SIN validar (Nombres,
+> Apellidos, Carrera, Dirección, Centro de estudios "Otro", y Nombre del encargado
+> en Lugares, tanto al crear como al editar). Los patrones `soloLetras` y `direccion`
+> llevaban `-` y `/` sin escapar dentro de la clase de caracteres, así que no
+> compilaban con la bandera `v` que usan los navegadores — y la spec de HTML manda
+> ignorar por completo un `pattern` que no compila, dejando el campo sin ninguna
+> regla, en silencio. **Pendiente: repetir estas dos pruebas en la app publicada
+> después del deploy.**
+
 ## D. Correo (después de terminar la Tarea 3)
 
 - [x] Registro con correo externo → llega el correo CON diseño Puriqay
