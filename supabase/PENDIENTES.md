@@ -75,9 +75,9 @@ el registro de todos. Pruébalo primero con un correo de invitación:
 - [x] Supabase → `Authentication` → `Users` → botón **Invite user**
 - [x] Escribe un correo externo (uno que NO sea de tu organización Supabase)
 - [x] Si el correo **llega** → el SMTP funciona ✅ (llegó a spam, ver nota al final)
-- [ ] Si **no llega** → revisa Host/Port/Username/Password. El Username es la
-      palabra `resend`, no tu correo. Y en Resend → `Logs` ves si el envío salió.
-- [ ] Borra ese usuario de prueba después
+  _(Si no hubiera llegado: revisar Host/Port/Username/Password. El Username es la_
+  _palabra `resend`, no tu correo. Y en Resend → `Logs` se ve si el envío salió.)_
+- [x] Borra ese usuario de prueba después
 
 ### 3.5 Reactivar la verificación
 - [x] Vuelve a `Authentication` → `Sign In / Providers` → **Email** → activa **"Confirm email"** → Save
@@ -224,7 +224,7 @@ Ordenadas por riesgo: las primeras son las que podrían estar rotas por RLS.
       Si sale el error rojo de "no actualizó ninguna fila", falta política de UPDATE.
 - [x] **Módulo Marketing** → crear tarea, enviar a revisión, aprobar, extender plazo,
       archivar. (Política `marketing_interno`)
-- [ ] **Coordinador con perfil incompleto** → debe salirle el modal pidiendo SOLO
+- [x] **Coordinador con perfil incompleto** → debe salirle el modal pidiendo SOLO
       los campos vacíos, y al guardar no debe volver a pedirlos en el siguiente login.
 
 ## B. Prueba de seguridad (la que demuestra que locations quedó cerrado)
@@ -246,9 +246,9 @@ console.log(await r.json());
 
 ## C. Validaciones de formularios (recién desplegadas)
 
-- [ ] **Crear lugar**: teléfono con letras o con más de 9 dígitos debe ser rechazado;
+- [x] **Crear lugar**: teléfono con letras o con más de 9 dígitos debe ser rechazado;
       los campos nuevos no deben dejar guardar vacíos
-- [ ] **Registro**: contraseña corta o sin símbolo debe ser rechazada antes de enviar;
+- [x] **Registro**: contraseña corta o sin símbolo debe ser rechazada antes de enviar;
       nombres con números deben ser rechazados
 
 > **Bug encontrado y corregido el 28-sep:** 7 campos estaban SIN validar (Nombres,
@@ -257,8 +257,8 @@ console.log(await r.json());
 > llevaban `-` y `/` sin escapar dentro de la clase de caracteres, así que no
 > compilaban con la bandera `v` que usan los navegadores — y la spec de HTML manda
 > ignorar por completo un `pattern` que no compila, dejando el campo sin ninguna
-> regla, en silencio. **Pendiente: repetir estas dos pruebas en la app publicada
-> después del deploy.**
+> regla, en silencio. **Reprobado en la app publicada tras el deploy: los 7 campos
+> rechazan números y siguen aceptando nombres compuestos.**
 
 ## D. Correo (después de terminar la Tarea 3)
 
@@ -386,3 +386,57 @@ toda la transacción y la cuenta de auth tampoco se crea (el usuario ve "Databas
 error saving new user"). Que exista la cuenta pero no el perfil significa que en
 ese momento el trigger no existía, o que alguien borró la fila de `profiles` a
 mano sin borrar el usuario de auth.
+
+### Regla operativa: nunca borrar filas de `profiles` a mano
+
+Para eliminar a un usuario hay que hacerlo desde **Authentication → Users**. Eso
+borra el usuario de auth **y** su perfil, por el `ON DELETE CASCADE` de
+`profiles_id_fkey`.
+
+Borrar solo la fila de `profiles` (desde el Table Editor o con un `delete`) deja
+al usuario de auth vivo pero sin perfil: puede iniciar sesión, pero `Dashboard.tsx`
+no encuentra su fila y le muestra la pantalla de error. **El trigger no lo
+arregla**, porque `handle_new_user` se dispara con el INSERT en `auth.users`, no
+cuando falta el perfil. Hay que recrear la fila a mano o borrar y recrear la cuenta.
+
+Todas las cuentas huérfanas que aparecieron en la auditoría del 28-sep salieron
+de ahí, no de un fallo del sistema.
+
+---
+
+# ESTADO FINAL (28-sep) — checklist completo
+
+Todas las casillas de este archivo están marcadas. Resumen de lo que quedó cerrado:
+
+| Bloque | Estado |
+|---|---|
+| Políticas RLS en las 6 tablas | ✅ aplicadas y **probadas en la app** |
+| Escalada de privilegios (`role`, `area`, `qr_token`…) | ✅ cerrada con grants por columna + trigger guardián |
+| Lectura de `locations` (datos de aliados) | ✅ cerrada, verificada consultando la API como VOLUNTARIO |
+| Permisos de `anon` y `TRUNCATE` | ✅ revocados |
+| Correo (Resend + dominio + plantilla + verificación) | ✅ funcionando de punta a punta |
+| Registro por formulario → trigger → perfil con QR | ✅ verificado en vivo |
+| Validaciones de formulario | ✅ bug del flag `v` corregido y reprobado |
+| Datos y cuentas de prueba | ✅ limpiados |
+
+Cuentas que quedaron (8, todas con perfil): `spiamicanal@` (ADMIN), `ceo@`,
+`dir_proyectos@`, `dir_rrhh@`, `dir_marketing@` (ADMIN), `int_marketing@`,
+`int_logistica@` (COORDINADOR) y `externo@puriqay.com` (VOLUNTARIO, se conserva
+a propósito para probar permisos).
+
+## Lo único que sigue abierto
+
+**Sincronizar el repo de migraciones con producción.** En `E:\Puriqay\SupabaseItalo`
+la migración `20260920184500_fix_profiles_privilege_escalation.sql` nunca se aplicó
+y difiere de lo que hay en la base real (13 vs 15 columnas con GRANT, y el trigger
+`trg_profiles_guard` no está en ningún archivo del repo). **Si alguien corre esas
+migraciones tal cual, reabre el permiso de escritura sobre `area`**, que es la
+columna que decide qué módulos ve cada persona. Se arregla con `supabase db pull`.
+
+Menores, sin urgencia:
+- Plantilla de "Reset password": sigue con el diseño genérico de Supabase
+- Política de UPDATE para que un ADMIN edite perfiles ajenos (hace falta solo si
+  se agrega un botón "promover a Coordinador")
+- Leaked Password Protection: requiere plan Pro
+- `phone` y `birth_date` están vacíos en los internos sembrados y nada los pide,
+  porque el modal de perfil progresivo no incluye esos dos campos
