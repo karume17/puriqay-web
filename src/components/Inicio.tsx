@@ -12,7 +12,7 @@ const PROXIMAS_EN_INICIO = 3;
 
 // Cuenta de la presentación (demo): en la tarjeta de Inicio ve la foto del creador
 // en vez de Markus. Quitar junto con la cuenta cuando termine la demo.
-const CORREO_DEMO = 'vampirar3@gmail.com';
+const CORREO_DEMO = 'vampirer3@gmail.com';
 
 type Props = {
   userId: string;
