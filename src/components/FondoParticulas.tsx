@@ -12,6 +12,11 @@ const ESPERA_TACTIL_MS = 2500;
 const DENSIDAD_ANILLO = 2.5;
 const DENSIDAD_PAVESAS = 3.5;
 
+// Deriva de los guiones (px/s): cada uno en su propio rumbo; al salir por un borde entran por el opuesto
+const DERIVA_MIN = 8;
+const DERIVA_MAX = 22;
+const MARGEN_DERIVA = 20;
+
 const azar = (min: number, max: number) => min + Math.random() * (max - min);
 const elegir = (lista: string[]) => lista[Math.floor(Math.random() * lista.length)];
 
@@ -21,6 +26,9 @@ type Particula = {
   fase: number;
   vel: number;
   color: string;
+  // Solo guiones: deriva lenta (px/s), para que el campo siga vivo con el mouse quieto
+  vx: number;
+  vy: number;
   // Solo pavesas: subida (px/s), vaivén lateral (px), tamaño (px), parpadeo (rad/s) y vida (0 → 1 en `duracion` s)
   sube: number;
   vaiven: number;
@@ -33,7 +41,8 @@ type Particula = {
 /**
  * Fondo animado detrás de las pantallas de acceso. Con mouse: guiones de colores
  * que forman un anillo alrededor del cursor (inspirado en la portada de Google
- * Antigravity). En pantallas táctiles: pavesas que suben solas, se mecen y
+ * Antigravity); los guiones derivan despacio cada uno en su rumbo, así que con el
+ * mouse quieto siguen cruzando el anillo. En pantallas táctiles: pavesas que suben solas, se mecen y
  * parpadean. En ambos, mantener pulsado (click o dedo) reúne lo de alrededor
  * hacia ese punto; al soltar vuelve a su sitio.
  * Va `fixed` detrás del contenido: el contenedor padre debe tener `isolate` para
@@ -74,12 +83,16 @@ export default function FondoParticulas() {
     const repartir = () => {
       const cantidad = Math.min(2000, Math.floor((ancho * alto) / 10000 * (tactil ? DENSIDAD_PAVESAS : DENSIDAD_ANILLO)));
       particulas = Array.from({ length: cantidad }, () => {
+        const rumbo = Math.random() * Math.PI * 2;
+        const rapidez = azar(DERIVA_MIN, DERIVA_MAX);
         const p: Particula = {
           x: Math.random() * ancho,
           y: Math.random() * alto,
           fase: Math.random() * Math.PI * 2,
           vel: azar(0.4, 1.2),
           color: elegir(tactil ? COLORES_PAVESA : COLORES),
+          vx: Math.cos(rumbo) * rapidez,
+          vy: Math.sin(rumbo) * rapidez,
           sube: azar(18, 55),
           vaiven: azar(6, 22),
           tam: azar(0.8, 2.2),
@@ -108,7 +121,7 @@ export default function FondoParticulas() {
       repartir();
     };
 
-    const dibujarAnillo = (t: number) => {
+    const dibujarAnillo = (t: number, dt: number) => {
       const base = Math.max(170, Math.min(ancho, alto) * 0.32) * (1 + Math.sin(t * 0.8) * 0.06);
       // Al reunir, el anillo se cierra y atrae lo que hay hasta ~2.5 radios de distancia
       const radio = base * (1 - 0.6 * reunion);
@@ -119,6 +132,12 @@ export default function FondoParticulas() {
       ctx.lineWidth = 2;
 
       for (const p of particulas) {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        if (p.x < -MARGEN_DERIVA) p.x += ancho + 2 * MARGEN_DERIVA;
+        else if (p.x > ancho + MARGEN_DERIVA) p.x -= ancho + 2 * MARGEN_DERIVA;
+        if (p.y < -MARGEN_DERIVA) p.y += alto + 2 * MARGEN_DERIVA;
+        else if (p.y > alto + MARGEN_DERIVA) p.y -= alto + 2 * MARGEN_DERIVA;
         const px = p.x + Math.sin(t * p.vel + p.fase) * 6;
         const py = p.y + Math.cos(t * p.vel * 0.8 + p.fase) * 6;
         const dx = px - centro.x;
@@ -178,8 +197,9 @@ export default function FondoParticulas() {
       // Suavizado por tiempo transcurrido (no por frame), para que siga igual de rápido a cualquier fps
       const dt = anterior ? Math.min((ms - anterior) / 1000, 0.5) : 0;
       anterior = ms;
-      // Con "reducir movimiento" el anillo no se mece solo (pero sigue al cursor).
-      // Las pavesas siempre se mueven: moverse solas es justamente el efecto.
+      // Con "reducir movimiento" (en Windows, "Efectos de animación" apagado) el anillo
+      // no se mece ni respira, pero sigue al cursor. La deriva de los guiones y las
+      // pavesas siempre se mueven: moverse solas es justamente el efecto.
       const t = reducirMovimiento && !tactil ? 0 : ms / 1000;
       if (!hayPuntero) {
         // Sin cursor (o en táctil sin tocar) el anillo deambula despacio por el centro
@@ -193,7 +213,7 @@ export default function FondoParticulas() {
 
       ctx.clearRect(0, 0, ancho, alto);
       if (tactil) dibujarPavesas(t, dt);
-      else dibujarAnillo(t);
+      else dibujarAnillo(t, dt);
 
       frame = requestAnimationFrame(dibujar);
     };
