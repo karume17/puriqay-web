@@ -76,11 +76,10 @@ export default function ResetPassword() {
       <div className="w-full max-w-md bg-white/30 backdrop-blur-[2px] p-8 md:p-10 rounded-3xl shadow-xl border border-white/70 border-t-[6px] border-t-pq-brand">
 
         <div className="text-center mb-10">
-          <h2 className="text-4xl font-black text-pq-teal-deep flex items-center justify-center gap-1.5 tracking-tight">
-            Puriqay
-            <span className="w-2.5 h-2.5 rounded-full bg-pq-marku mt-2"></span>
-          </h2>
-          <p className="text-pq-teal-dark/70 font-bold uppercase tracking-widest text-xs mt-2">Nueva contraseña</p>
+          <h1>
+            <img src="/img/puriqay-plus-by-puriqay.png" alt="Puriqay +, by Puriqay Voluntariado" className="w-64 max-w-full h-auto mx-auto" />
+          </h1>
+          <p className="text-pq-teal-dark/70 font-bold uppercase tracking-widest text-xs mt-4">Nueva contraseña</p>
         </div>
 
         {status === 'checking' && (
