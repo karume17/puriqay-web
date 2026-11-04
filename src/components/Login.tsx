@@ -2,8 +2,15 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Mail, Lock, UserPlus, ArrowRight, Sun, Mountain, Leaf, BookOpen, KeyRound } from 'lucide-react';
 import { traducirErrorAuth } from '../lib/authErrors';
-import FondoParticulas from './FondoParticulas';
+
+// Rayitas dibujadas a mano que acompañan al título y al botón
+const Rays = ({ side }: { side: 'l' | 'r' }) => (
+  <svg className={`nb-rays nb-rays--${side}`} viewBox="0 0 40 44" aria-hidden="true">
+    <path d="M6 6 L18 14 M2 22 L16 22 M6 38 L18 30" />
+  </svg>
+);
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -48,76 +55,149 @@ export default function Login() {
       // replace: el login sale del historial y "Atrás" desde el panel no vuelve aquí.
       navigate('/dashboard', { replace: true });
     }
-    
+
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen relative isolate bg-white flex justify-center items-center p-4">
-      <FondoParticulas />
-      <div className="w-full max-w-md bg-white/30 backdrop-blur-[2px] p-8 md:p-10 rounded-3xl shadow-xl border border-white/70 border-t-[6px] border-t-pq-brand">
-        
-        <div className="mb-10">
-          <h1>
-            <img src="/img/puriqay-plus-by-puriqay.png" alt="Puriqay +, by Puriqay Voluntariado" className="w-64 max-w-full h-auto mx-auto" />
-          </h1>
-        </div>
+    <div className="nb-scope nb-desk">
+      {/* Filtros SVG: bordes rasgados del papel y tinta irregular del sello */}
+      <svg className="nb-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <filter id="nb-rough" x="-5%" y="-15%" width="110%" height="130%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="4" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="5" />
+        </filter>
+        <filter id="nb-ink" x="-5%" y="-10%" width="110%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="2" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" />
+        </filter>
+      </svg>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-bold text-pq-teal-dark mb-2">Correo Electrónico</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border-[1.5px] border-pq-border rounded-xl bg-white focus:border-pq-teal focus:shadow-pq-focus outline-none transition-all font-medium text-pq-ink"
-              placeholder="tu@correo.com"
-            />
+      <main className="nb-book">
+        {/* ===== Tapa ===== */}
+        <aside className="nb-cover">
+          <div className="nb-logo">
+            <img src="/img/puriqay-p-blanca.png" alt="" />
+            <span>Puriqay</span>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-pq-teal-dark mb-2">Contraseña</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border-[1.5px] border-pq-border rounded-xl bg-white focus:border-pq-teal focus:shadow-pq-focus outline-none transition-all font-medium text-pq-ink"
-              placeholder="••••••••"
-            />
+          <svg className="nb-trail" viewBox="0 0 220 130" aria-hidden="true">
+            <path d="M6 118 C 40 70, 10 40, 70 52 S 140 30, 160 56 S 190 40, 206 22" />
+          </svg>
+          <Mountain className="nb-mount" aria-hidden="true" />
+          <div className="nb-route">
+            Personas que<br />cuidan territorios
           </div>
 
-          <div className="text-right -mt-3">
-            <Link to="/forgot-password" className="text-sm text-pq-teal font-bold hover:text-pq-teal-dark transition-colors hover:underline">
+          <Leaf className="nb-leaf nb-leaf--a" aria-hidden="true" />
+          <Leaf className="nb-leaf nb-leaf--b" aria-hidden="true" />
+
+          <img className="nb-marku" src="/img/marku-mapa.png" alt="Marku, la mascota de Puriqay, con un mapa" />
+          <div className="nb-slogan">
+            Juntos por un<br />mejor mañana.
+          </div>
+        </aside>
+
+        {/* ===== Página ===== */}
+        <section className="nb-page">
+          {/* Pestañas-separador de arriba: solo decoración, no se pueden tocar */}
+          <div className="nb-tabs" aria-hidden="true" style={{ pointerEvents: 'none', userSelect: 'none' }}>
+            <span className="nb-tab nb-tab--ingresar">
+              <BookOpen size={17} /> Ingresar
+            </span>
+            <span className="nb-tab nb-tab--registro">
+              <UserPlus size={17} /> Misiones
+            </span>
+            <span className="nb-tab nb-tab--clave">
+              <KeyRound size={17} /> Rutas
+            </span>
+          </div>
+
+          {/* Pestañas decorativas del borde derecho */}
+          <div className="nb-side" aria-hidden="true">
+            <span className="nb-side-t nb-side-t--a">Voluntariado</span>
+            <span className="nb-side-t nb-side-t--b">Puriqay</span>
+          </div>
+
+          <Sun className="nb-sun" aria-hidden="true" />
+
+          <div className="nb-head">
+            <h1 className="nb-title">
+              <Rays side="l" />
+              ¡Abre tu<br />Bitácora!
+              <Rays side="r" />
+            </h1>
+            <p className="nb-sub">Suma tu huella. El impacto empieza en esta página.</p>
+          </div>
+
+          <form onSubmit={handleLogin}>
+            <label className="nb-tag">
+              <div className="nb-paper">
+                <span className="nb-lbl"><Mail size={18} aria-hidden="true" /> Correo electrónico</span>
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@correo.com"
+                />
+              </div>
+            </label>
+
+            <label className="nb-tag nb-tag--r">
+              <div className="nb-paper">
+                <span className="nb-lbl"><Lock size={18} aria-hidden="true" /> Contraseña</span>
+                <input
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </div>
+            </label>
+
+            <Link to="/forgot-password" className="nb-forgot">
               ¿Olvidaste tu contraseña?
             </Link>
-          </div>
 
-          {errorMsg && (
-            <div className="bg-pq-error-50 text-pq-error text-sm text-center font-bold p-3 rounded-xl border border-pq-error/20">
-              {errorMsg}
-              {needsConfirmation && (
-                <button type="button" onClick={handleResend} disabled={resending} className="block mx-auto mt-2 text-pq-teal font-black hover:underline disabled:opacity-60">
-                  {resending ? 'Enviando...' : 'Reenviar correo de confirmación'}
-                </button>
-              )}
+            {errorMsg && (
+              <div className="nb-error" role="alert">
+                {errorMsg}
+                {needsConfirmation && (
+                  <button type="button" onClick={handleResend} disabled={resending} className="nb-linkbtn">
+                    {resending ? 'Enviando...' : 'Reenviar correo de confirmación'}
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="nb-stamp-wrap">
+              <Rays side="l" />
+              <button type="submit" disabled={loading} className="nb-stamp">
+                <img src="/img/puriqay-p-circulo.png" alt="" />
+                <span className="nb-sep" aria-hidden="true" />
+                {loading ? 'Sellando...' : 'Sellar pasaporte'}
+              </button>
+              <Rays side="r" />
             </div>
-          )}
+          </form>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-pq-teal hover:bg-pq-teal-dark text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-pq-teal/30 hover:-translate-y-0.5 transition-all duration-200 mt-2"
-          >
-            {loading ? 'Cargando...' : 'Ingresar al sistema'}
-          </button>
-          
-          <p className="text-center text-sm text-pq-ink/70 mt-6 font-medium">
-            ¿No tienes una cuenta? <Link to="/register" className="text-pq-teal font-black hover:text-pq-teal-dark transition-colors hover:underline">Regístrate aquí</Link>
-          </p>
-        </form>
-      </div>
+          <div className="nb-or">o</div>
+          <Link to="/register" className="nb-swap">
+            <UserPlus size={28} aria-hidden="true" />
+            <span className="nb-swap-t">
+              <small>¿Aún no tienes tu pasaporte?</small>
+              <b>Súmate aquí</b>
+            </span>
+            <ArrowRight size={22} aria-hidden="true" />
+          </Link>
+
+          <Leaf className="nb-pleaf" aria-hidden="true" />
+        </section>
+      </main>
     </div>
   );
 }
