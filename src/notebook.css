@@ -400,3 +400,291 @@
 @media (max-width:820px){
   .nb-logo img{height:58px}
 }
+
+/* =====================================================================
+   REGISTRO: página izquierda con Marku pensando + formulario en papelitos
+   (un solo bloque, compactado para medir igual que el login)
+   ===================================================================== */
+
+/* ---------- Pestaña extra ---------- */
+.nb-tab--rutas{background:#8b5fd6;color:#fff}
+
+/* ---------- Campos dentro de los papelitos ---------- */
+.nb-field{display:block;min-width:0}
+.nb-paper > .nb-field + .nb-field{margin-top:clamp(6px,1.1vh,12px)}
+.nb-paper input[type="date"]{color-scheme:light}
+.nb-paper .nb-lbl small{display:inline;margin:0;font-size:.72rem;font-weight:600;color:var(--nb-muted)}
+
+/* ---------- Pantalla "Revisa tu correo" ---------- */
+.nb-mail{text-align:center}
+.nb-mail-ico{
+  width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:0 auto 10px;
+  background:rgba(14,107,115,.12);border:2px dashed var(--nb-stamp);color:var(--nb-stamp);
+}
+.nb-mail p{font-weight:600;line-height:1.35;margin:0 0 8px}
+.nb-mail b{color:var(--nb-ink)}
+a.nb-stamp{text-decoration:none}
+
+/* ---------- Página izquierda: papel con grano y fibras ---------- */
+.nb-cover.nb-cover--paper{
+  display:none;
+  color:var(--nb-text);
+  background-color:var(--nb-paper);
+  background-image:
+    radial-gradient(rgba(0,0,0,.1) 1px,transparent 1.4px),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .1  0 0 0 .14 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012 .55' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .28  0 0 0 0 .1  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>"),
+    radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(196,150,70,.2) 100%);
+  background-size:20px 20px,240px 240px,300px 300px,100% 100%;
+  box-shadow:inset -26px 0 30px -22px rgba(0,0,0,.3);
+}
+/* sin borde punteado de tapa; sombra del lomo a la derecha */
+.nb-cover.nb-cover--paper::before{display:none}
+.nb-cover.nb-cover--paper::after{
+  width:46px;
+  background:linear-gradient(270deg,rgba(0,0,0,.3),rgba(0,0,0,.08) 45%,transparent);
+}
+.nb-cover--paper > *{position:relative;z-index:1}
+
+.nb-lp-head{
+  display:flex;align-items:center;gap:10px;padding-bottom:10px;
+  border-bottom:2px dashed var(--nb-paper-edge);
+  font-family:var(--nb-hand);font-weight:700;font-size:clamp(1.05rem,2.3vh,1.3rem);color:var(--nb-muted);
+}
+.nb-lp-head svg{color:#e8845a;flex:none}
+.nb-lp-pag{margin-left:auto;white-space:nowrap}
+
+/* ---------- Marku pensando la frase en una nube ---------- */
+.nb-think{
+  width:min(100%,44vh);
+  margin:0 auto;
+  container-type:inline-size;     /* el texto se escala con el ancho de la nube */
+}
+.nb-think-cloud{position:relative;width:100%;aspect-ratio:620/490}
+.nb-think-svg{
+  position:absolute;inset:0;width:100%;height:100%;overflow:visible;
+  filter:drop-shadow(0 6px 6px rgba(60,40,10,.28));
+}
+.nb-think-text{
+  position:absolute;left:17%;top:13%;width:66%;height:52%;margin:0;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--nb-hand);font-weight:500;color:var(--nb-ink);
+  font-size:5.2cqw;line-height:1.12;
+}
+.nb-think-row{display:flex;align-items:flex-end;justify-content:space-between;gap:3%}
+.nb-think-marku{
+  display:block;width:62%;height:auto;margin-top:-6%;
+  filter:drop-shadow(0 8px 10px rgba(60,40,10,.25));
+}
+
+/* Brújula (en columna, a la derecha de Marku) */
+.nb-lp-compass{display:flex;align-items:center;gap:18px;color:var(--nb-ink)}
+.nb-lp-compass svg{width:clamp(72px,12vh,110px);height:auto;flex:none;opacity:.55}
+.nb-lp-compass p{
+  margin:0;font-family:var(--nb-hand);font-weight:700;line-height:1.1;
+  font-size:clamp(1.1rem,2.5vh,1.45rem);color:var(--nb-muted);
+}
+.nb-think-row .nb-lp-compass{
+  flex:1;min-width:0;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-bottom:4%;
+}
+.nb-think-row .nb-lp-compass svg{width:min(80%,clamp(56px,10vh,92px))}
+.nb-think-row .nb-lp-compass p{font-size:clamp(.95rem,2vh,1.2rem)}
+
+.nb-lp-leaf{
+  position:absolute;z-index:0;left:8px;bottom:90px;width:92px;height:92px;
+  color:var(--nb-tape);opacity:.65;stroke-width:1.5;transform:scaleX(-1) rotate(-14deg);pointer-events:none;
+}
+
+.nb-lp-foot{
+  display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 12px;
+  font-weight:600;color:var(--nb-muted);
+}
+.nb-lp-foot span{font-size:.72rem}
+.nb-lp-back{
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none;
+  font-family:var(--nb-hand);font-weight:700;font-size:1.2rem;color:var(--nb-ink);
+}
+.nb-lp-back:hover{text-decoration:underline}
+
+/* ---------- Escritorio ---------- */
+@media (min-width:821px){
+
+  /* La página izquierda es papel y deja ver un borde de tapa a la izquierda */
+  .nb-cover.nb-cover--paper{
+    display:flex;flex-direction:column;justify-content:space-between;
+    gap:clamp(12px,2.4vh,24px);
+    margin:0 0 0 30px;
+    border-radius:8px 0 0 8px;
+    padding:clamp(20px,3.6vh,38px) clamp(22px,3vw,44px) clamp(16px,3vh,28px);
+  }
+
+  /* Hoja derecha con menos aire arriba y abajo */
+  .nb-book--reg .nb-page{
+    padding-top:clamp(14px,2.6vh,28px);
+    padding-bottom:clamp(14px,2.4vh,26px);
+  }
+
+  /* Pestañas: 4 en total, un poco más compactas */
+  .nb-book--reg .nb-tabs{left:40px;gap:8px}
+  .nb-book--reg .nb-tab{padding:7px 13px 9px;font-size:1.15rem;gap:5px}
+  .nb-tab--ingresar:hover,.nb-tab--rutas:hover{transform:translateY(-3px) rotate(0deg)}
+  .nb-tab.nb-tab--active,.nb-tab.nb-tab--active:hover{transform:translateY(-5px) rotate(0deg);padding-bottom:13px}
+
+  /* Título y subtítulo compactos */
+  .nb-book--reg .nb-title{font-size:clamp(1.7rem,4.2vh,2.8rem);margin-bottom:0}
+  .nb-book--reg .nb-title::after{display:block}
+  .nb-book--reg .nb-sub{
+    font-size:clamp(1rem,2.2vh,1.3rem);
+    margin:clamp(8px,1.6vh,14px) auto 0;
+  }
+
+  /* Papelitos más anchos y bajos: cada uno lleva 1 o 2 campos */
+  .nb-book--reg .nb-tag{width:94%;margin-left:0;margin-right:auto;margin-bottom:clamp(10px,1.8vh,18px)}
+  .nb-book--reg .nb-tag--r{margin-left:auto;margin-right:0}
+  .nb-book--reg .nb-tag--c{width:88%;margin-left:auto;margin-right:auto}
+  .nb-book--reg .nb-paper{padding:clamp(5px,.9vh,9px) 14px clamp(6px,1.1vh,10px)}
+  .nb-book--reg .nb-lbl{font-size:clamp(1rem,2.2vh,1.2rem)}
+  .nb-book--reg .nb-paper input{
+    padding:clamp(5px,.8vh,8px) 12px;
+    margin-top:clamp(2px,.5vh,4px);
+  }
+
+  /* Sello y botón de iniciar sesión más bajos */
+  .nb-book--reg .nb-stamp{padding:clamp(5px,1vh,9px) 20px;margin:2px 0}
+  .nb-book--reg .nb-swap{padding:clamp(5px,.9vh,9px) 18px}
+}
+
+/* Si la ventana es angosta, se oculta la pestaña decorativa "Rutas" */
+@media (min-width:821px) and (max-width:1100px){
+  .nb-book--reg .nb-tab--rutas{display:none}
+}
+
+/* ---------- Móvil: se oculta la página izquierda ---------- */
+@media (max-width:820px){
+  .nb-book--reg .nb-page{border-radius:12px}
+}
+@media (max-width:480px){
+  .nb-book--reg .nb-two{grid-template-columns:1fr;row-gap:10px}
+}
+
+/* =====================================================================
+   PASAR LA PÁGINA (v2): animación nativa del navegador (View Transitions)
+   La hoja derecha se levanta hacia la izquierda y, en la segunda mitad,
+   cae su reverso (la página izquierda del registro). Al volver, al revés.
+   ===================================================================== */
+@keyframes nbFlipOutLeft{
+  from{transform:rotateY(0deg)}
+  to{transform:rotateY(-90deg)}
+}
+@keyframes nbFlipInLeft{
+  from{transform:rotateY(90deg)}
+  to{transform:rotateY(0deg)}
+}
+@keyframes nbFlipOutRight{
+  from{transform:rotateY(0deg)}
+  to{transform:rotateY(90deg)}
+}
+@keyframes nbFlipInRight{
+  from{transform:rotateY(-90deg)}
+  to{transform:rotateY(0deg)}
+}
+@keyframes nbFadeOut{to{opacity:0}}
+@keyframes nbFadeIn{from{opacity:0}}
+
+@media (min-width:821px) and (prefers-reduced-motion:no-preference){
+
+  /* Solo durante la transición se "nombran" las dos hojas */
+  html[data-nb-turn] .nb-page{view-transition-name:nb-right}
+  html[data-nb-turn] .nb-cover--paper{view-transition-name:nb-left}
+
+  /* Si el libro mide distinto en login y registro, se ajusta suave en vez de saltar */
+  ::view-transition-group(nb-right),
+  ::view-transition-group(nb-left){
+    animation-duration:1s;
+    animation-timing-function:ease-in-out;
+  }
+
+  /* Perspectiva con el punto de fuga en el lomo, así la hoja queda de canto sin dejar rastro */
+  ::view-transition-image-pair(nb-right){perspective:2400px;perspective-origin:0% 50%}
+  ::view-transition-image-pair(nb-left){perspective:2400px;perspective-origin:100% 50%}
+
+  /* Sin animaciones por defecto (fundidos): solo las que definimos abajo */
+  ::view-transition-old(nb-right),
+  ::view-transition-new(nb-right),
+  ::view-transition-old(nb-left),
+  ::view-transition-new(nb-left){
+    animation:none;
+    mix-blend-mode:normal;
+    backface-visibility:hidden;
+  }
+  ::view-transition-old(nb-right),
+  ::view-transition-new(nb-right){transform-origin:0% 50%}
+  ::view-transition-old(nb-left),
+  ::view-transition-new(nb-left){transform-origin:100% 50%}
+
+  /* ---------- LOGIN -> REGISTRO: la hoja derecha pasa hacia la izquierda ---------- */
+  html[data-nb-turn="next"]::view-transition-old(nb-right){
+    z-index:2;
+    animation:nbFlipOutLeft .5s cubic-bezier(.12,0,.39,0) both;
+  }
+  html[data-nb-turn="next"]::view-transition-new(nb-left){
+    animation:nbFlipInLeft .5s cubic-bezier(.61,1,.88,1) .5s both;
+  }
+  /* La tapa del login se queda quieta y solo se cambia por el fondo nuevo al final */
+  html[data-nb-turn="next"]::view-transition-old(root){
+    animation:nbFadeOut .25s linear .75s both;
+  }
+  html[data-nb-turn="next"]::view-transition-new(root){
+    animation:nbFadeIn .25s linear .75s both;
+  }
+
+  /* ---------- REGISTRO -> LOGIN: la página izquierda regresa hacia la derecha ---------- */
+  html[data-nb-turn="prev"]::view-transition-old(nb-left){
+    animation:nbFlipOutRight .5s cubic-bezier(.12,0,.39,0) both;
+  }
+  html[data-nb-turn="prev"]::view-transition-new(nb-right){
+    z-index:2;
+    animation:nbFlipInRight .5s cubic-bezier(.61,1,.88,1) .5s both;
+  }
+  /* Debajo ya está la tapa del login, que se descubre al levantarse la página */
+  html[data-nb-turn="prev"]::view-transition-old(root){animation:none;opacity:0}
+  html[data-nb-turn="prev"]::view-transition-new(root){animation:none;opacity:1}
+}
+/* =====================================================================
+   REGISTRO: que el libro mida igual que el del login (sin scroll)
+   ===================================================================== */
+@media (min-width:821px){
+
+  /* La página izquierda ya no puede estirar el libro:
+     su alto lo decide la hoja derecha y, si algo no cabe, se recorta */
+  .nb-cover.nb-cover--paper{
+    contain:size;
+    min-height:0;
+    overflow:hidden;
+    padding-top:clamp(16px,3vh,30px);
+    padding-bottom:clamp(12px,2.4vh,22px);
+    gap:clamp(8px,1.8vh,18px);
+  }
+
+  /* Marku y la nube un poco más chicos */
+  .nb-think{width:min(100%,40vh)}
+
+  /* El pie en una sola línea */
+  .nb-lp-foot{flex-wrap:nowrap;gap:12px}
+  .nb-lp-foot span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* Hoja derecha un poco más compacta */
+  .nb-book--reg .nb-page{
+    padding-top:clamp(10px,1.8vh,20px);
+    padding-bottom:clamp(10px,1.6vh,18px);
+  }
+  .nb-book--reg .nb-title{font-size:clamp(1.6rem,3.8vh,2.5rem)}
+  .nb-book--reg .nb-sub{
+    font-size:clamp(.95rem,2vh,1.2rem);
+    margin:clamp(6px,1.2vh,10px) auto 0;
+  }
+  .nb-book--reg .nb-tag{margin-bottom:clamp(8px,1.2vh,12px)}
+  .nb-book--reg .nb-paper{padding:clamp(4px,.7vh,7px) 14px clamp(5px,.9vh,8px)}
+  .nb-book--reg .nb-paper > .nb-field + .nb-field{margin-top:clamp(4px,.8vh,8px)}
+}
+

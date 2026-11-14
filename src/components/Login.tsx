@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Mail, Lock, UserPlus, ArrowRight, Sun, Mountain, Leaf, BookOpen, KeyRound } from 'lucide-react';
 import { traducirErrorAuth } from '../lib/authErrors';
+import { usePageTurn, useTurnIn } from '../lib/pageTurn';
 
 // Rayitas dibujadas a mano que acompañan al título y al botón
 const Rays = ({ side }: { side: 'l' | 'r' }) => (
@@ -20,6 +21,18 @@ export default function Login() {
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [resending, setResending] = useState(false);
   const navigate = useNavigate();
+
+  // Efecto de pasar la hoja (salida hacia el registro / entrada al volver del registro)
+  const { turning, turnTo } = usePageTurn();
+  const turnIn = useTurnIn();
+  const rootClass = [
+    'nb-scope',
+    'nb-desk',
+    turning && `nb-turn-out-${turning}`,
+    turnIn && `nb-turn-in-${turnIn}`,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   // Con la sesión ya abierta, el login no tiene nada que hacer: directo al panel.
   useEffect(() => {
@@ -60,7 +73,7 @@ export default function Login() {
   };
 
   return (
-    <div className="nb-scope nb-desk">
+    <div className={rootClass}>
       {/* Filtros SVG: bordes rasgados del papel y tinta irregular del sello */}
       <svg className="nb-defs" width="0" height="0" aria-hidden="true" focusable="false">
         <filter id="nb-rough" x="-5%" y="-15%" width="110%" height="130%">
@@ -186,7 +199,8 @@ export default function Login() {
           </form>
 
           <div className="nb-or">o</div>
-          <Link to="/register" className="nb-swap">
+          {/* Al darle clic, la hoja se abre hacia la izquierda y pasa al registro */}
+          <Link to="/register" onClick={turnTo('/register', 'next')} className="nb-swap">
             <UserPlus size={28} aria-hidden="true" />
             <span className="nb-swap-t">
               <small>¿Aún no tienes tu pasaporte?</small>
