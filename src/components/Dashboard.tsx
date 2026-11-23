@@ -18,11 +18,12 @@ const AttendanceScanner = lazy(() => import('./AttendanceScanner'));
 const MarketingBoard = lazy(() => import('./MarketingBoard'));
 const CompleteProfileModal = lazy(() => import('./CompleteProfileModal'));
 const MiPerfil = lazy(() => import('./MiPerfil'));
+const TalentoHumano = lazy(() => import('./TalentoHumano'));
 
 const cargandoPestana = (
   <div className="flex justify-center p-10"><p className="text-pq-teal-dark font-medium animate-pulse">Cargando...</p></div>
 );
-import { Users, QrCode, LogOut, ChevronLeft, Menu, X, House, ClipboardCheck, CalendarDays, CalendarCheck, MapPin, Camera, Megaphone, UserCircle } from 'lucide-react';
+import { Users, QrCode, LogOut, ChevronLeft, Menu, X, House, ClipboardCheck, CalendarDays, CalendarCheck, MapPin, Camera, Megaphone, UserCircle, UsersRound } from 'lucide-react';
 
 // Campos "avanzados" que Register.tsx ya no pide en la fase 1 (fricción cero).
 // Solo se le exigen al equipo interno (COORDINADOR/ADMIN): si a uno de ellos le
@@ -49,6 +50,7 @@ const DIRECCIONES: Record<string, string> = {
   available_jornadas: 'proximas-jornadas',
   mis_asistencias: 'mis-asistencias',
   scanner: 'control-asistencia',
+  talento_humano: 'talento-humano',
   qr: 'mi-qr',
   perfil: 'perfil',
 };
@@ -58,9 +60,9 @@ const rutaDe = (tab: string, jornadaId?: string) =>
 
 // Pestañas que no son de todos, con el permiso que piden (las mismas condiciones
 // que muestran su botón en el menú). Abrir una por dirección sin permiso lleva a Inicio.
-const PERMISO_TAB: Record<string, 'gestionaJornadas' | 'veVoluntarios' | 'veMarketing' | 'esInterno'> = {
+const PERMISO_TAB: Record<string, 'gestionaJornadas' | 'veVoluntarios' | 'veMarketing' | 'esInterno' | 'veTalentoHumano'> = {
   locations: 'gestionaJornadas', jornadas: 'gestionaJornadas', volunteers: 'veVoluntarios',
-  marketing: 'veMarketing', scanner: 'esInterno',
+  marketing: 'veMarketing', scanner: 'esInterno', talento_humano: 'veTalentoHumano',
 };
 
 export default function Dashboard() {
@@ -197,7 +199,7 @@ export default function Dashboard() {
   const verDetalle = (id: string) => navigate(rutaDe(activeTab, id));
 
   // `compacto`: menú de escritorio contraído (solo iconos).
-  const SidebarItem = ({ id, label, icon: Icon, compacto }: any) => {
+  const SidebarItem = ({ id, label, icon: Icon, compacto, nuevo }: any) => {
     const isActive = activeTab === id;
     return (
       <button
@@ -212,6 +214,9 @@ export default function Dashboard() {
       >
         <Icon size={22} className={`min-w-[22px] ${isActive ? 'text-white' : 'text-pq-teal-dark/70'}`} />
         {!compacto && <span className="ml-3 truncate text-left">{label}</span>}
+        {!compacto && nuevo && (
+          <span className="ml-auto shrink-0 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-pq-marku-50 text-pq-marku-ink">Nuevo</span>
+        )}
       </button>
     );
   };
@@ -274,6 +279,7 @@ export default function Dashboard() {
         <SidebarItem id="available_jornadas" label="Próximas Jornadas" icon={CalendarCheck} compacto={compacto} />
         <SidebarItem id="mis_asistencias" label="Mis asistencias" icon={ClipboardCheck} compacto={compacto} />
         {p.esInterno && <SidebarItem id="scanner" label="Control de Asistencia" icon={Camera} compacto={compacto} />}
+        {p.veTalentoHumano && <SidebarItem id="talento_humano" label="Talento Humano" icon={UsersRound} nuevo compacto={compacto} />}
         <SidebarItem id="qr" label="Mi Código QR" icon={QrCode} compacto={compacto} />
       </nav>
 
@@ -438,6 +444,12 @@ export default function Dashboard() {
           {!detalle && activeTab === 'perfil' && userId && (
             <div className="max-w-4xl mx-auto">
               <MiPerfil userId={userId} onSaved={(first, last) => setNombre(nombreCorto(first, last))} />
+            </div>
+          )}
+
+          {!detalle && activeTab === 'talento_humano' && (
+            <div className="max-w-6xl mx-auto">
+              <TalentoHumano puedeEditar={p.editaAsistenciaTH} veDatosPersonales={p.veDatosPersonales} />
             </div>
           )}
 
