@@ -44,6 +44,8 @@ export function permisos({ role, area, is_active }: Perfil) {
     archivaLugares: esSuperadmin || cargo(ADMIN, [AREAS.PROYECTOS]),
     supervisaMarketing,
     veMarketing: supervisaMarketing || cargo(INTERNO, [AREAS.COMUNICACION]),
+    veTalentoHumano: cargo(INTERNO, [AREAS.GERENCIA, AREAS.TI, AREAS.GESTION_HUMANA]),
+    editaAsistenciaTH: cargo(ADMIN, [AREAS.GERENCIA, AREAS.TI, AREAS.GESTION_HUMANA]),
   };
 }
 
